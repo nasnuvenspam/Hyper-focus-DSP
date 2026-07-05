@@ -71,12 +71,12 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:
 .rec-item{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--border2);padding:10px 12px;border-radius:8px}
 .rec-info{display:flex;flex-direction:column;gap:3px}
 .rec-name{font-family:var(--mono);font-size:10px;color:var(--text);font-weight:600}
-.rec-meta{font-family:var(--mono);font-size:8px;color:var(--muted)}
+.rec-meta{font-family:var(--mono);font-size:8px;color:var(--cyan)}
 
 hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 #peak-alert{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;padding:8px 12px;background:var(--red-glow);border:1px solid var(--red);border-radius:6px;color:var(--red);text-align:center;display:none;margin-bottom:10px}
 #peak-alert.show{display:block}
-.warn-box{background:var(--violet-glow);border:1px solid var(--violet);border-radius:6px;padding:10px;font-family:var(--mono);font-size:9px;color:var(--violet);margin-bottom:10px;line-height:1.5}
+.warn-box{background:rgba(255,255,255,0.05);border:1px solid var(--border2);border-radius:6px;padding:10px;font-family:var(--mono);font-size:9px;color:var(--text);margin-bottom:10px;line-height:1.5}
 #fb-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cyan);border-radius:8px;padding:10px 20px;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cyan);opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;box-shadow:0 10px 20px rgba(0,0,0,0.5)}
 #fb-toast.show{opacity:1}
 </style>
@@ -97,20 +97,17 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 <div class="cnt">
   
   <div id="peak-alert">⚠ SATURAÇÃO CRÍTICA (CLIP) DETECTADA</div>
+  
   <div class="card">
-    <div class="clabel" style="margin-bottom:4px">Entrada de Áudio</div>
+    <div class="clabel" style="margin-bottom:4px">Entrada & RTA</div>
     <div style="text-align:center;padding:10px 0">
       <div style="font-family:var(--mono);font-size:46px;font-weight:700;color:var(--cyan);letter-spacing:-2px;line-height:1" id="mic-freq">—</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px" id="mic-note">Aguardando Mic</div>
       <div style="margin-top:6px"><span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="mic-db">— dBFS</span></div>
     </div>
     <div class="vu-wrap"><div class="vu-bar" id="mic-vu"></div></div>
-    <button class="btn btn-c" id="mic-btn" onclick="toggleMic()" style="margin-top:12px">🎙 LIGAR MICROFONE</button>
-  </div>
-
-  <div class="card">
-    <div class="clabel">Análise Espectral</div>
-    <canvas id="mic-spec" class="cvs-box" height="130"></canvas>
+    
+    <canvas id="mic-spec" class="cvs-box" height="130" style="margin-top:14px"></canvas>
     <div class="leg-wrap">
       <div class="leg-item"><div class="leg-c" style="background:var(--blue)"></div><div class="leg-t">SUB/LOW</div></div>
       <div class="leg-item"><div class="leg-c" style="background:var(--cyan)"></div><div class="leg-t">LO-MID</div></div>
@@ -118,14 +115,19 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
       <div class="leg-item"><div class="leg-c" style="background:var(--amber)"></div><div class="leg-t">HI-MID</div></div>
       <div class="leg-item"><div class="leg-c" style="background:var(--violet)"></div><div class="leg-t">HIGH</div></div>
     </div>
+    
+    <button class="btn btn-c" id="mic-btn" onclick="toggleMic()" style="margin-top:16px">🎙 LIGAR MICROFONE</button>
   </div>
 
   <div class="card">
     <div class="clabel">DSP & Roteamento Dinâmico</div>
-    <div class="warn-box">⚠ A monitoração injeta o sinal nos fones ou alto-falante. Para forçar o feedback contínuo (Doom Mode), aproxime os fones do microfone do celular. O iOS bloqueia microfonia feita pelos próprios alto-falantes internos.</div>
     
-    <div class="row" style="justify-content:space-between; margin-bottom:12px">
-      <div class="clabel2" style="margin:0; color:var(--text); font-size:10px">Monitoração Principal</div>
+    <div class="warn-box">
+      <b style="color:var(--cyan)">Monitor Principal:</b> Libera o som para o seu fone. <br><br>
+      <b style="color:var(--red)">Atenção:</b> Para esculpir microfonias e usar o Doom Mode, ative o botão abaixo e aproxime o seu fone de ouvido da cápsula do microfone.
+    </div>
+    <div class="row" style="justify-content:space-between; margin-bottom:12px; background:var(--panel2); padding:10px; border-radius:8px; border:1px solid var(--border2)">
+      <div class="clabel2" style="margin:0; color:var(--text); font-size:10px; font-weight:700">🔊 ATIVAR SAÍDA DE SOM (MONITOR)</div>
       <button class="chip" id="mon-btn" onclick="toggleMicMonitor()" style="width:60px">OFF</button>
     </div>
 
@@ -179,7 +181,7 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
       <div class="clabel2" style="margin:0; color:var(--red)">3. Doom Mode (Drive + Limiter)</div>
       <button class="chip chip-xs" id="doom-toggle" onclick="toggleDoomMode()" style="width:50px">OFF</button>
     </div>
-    <div style="font-size:9px; color:var(--muted); margin:6px 0 10px">Limiter agressivo (-3dB) no master p/ garantir sustentação infinita sem romper alto-falantes.</div>
+    <div style="font-size:9px; color:var(--muted); margin:6px 0 10px">O sinal ganha saturação harmônica e bate num Limiter Teto (-3dB). Transforme microfonia indesejada em *Sustain* infinito.</div>
     <div>
       <input type="range" class="ri" id="mic-drive" min="0" max="100" step="1" value="20" oninput="updateDoomMode()" disabled>
       <div class="rlabs"><span>Clean</span><span id="drive-val">20% Drive</span></div>
@@ -188,12 +190,18 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 
   <div class="card">
     <div class="clabel">Gravador Direto (WAV PCM 24-bit)</div>
-    <div style="font-size:9px; color:var(--muted); margin-bottom:12px">Captura fiel do monitoramento (incluindo Delay e Saturação). Pode ser salvo direto no app Arquivos do iOS.</div>
+    <div style="font-size:9px; color:var(--muted); margin-bottom:12px">A gravação captura exatamente o sinal pós-efeitos (Delay/Doom). Funciona mesmo se a monitoração de fone estiver desligada.</div>
+    
     <button class="btn btn-x" id="rec-btn" onclick="toggleRecord()" style="border-color:var(--red); color:var(--red)">
       <span class="dot" style="background:var(--red)" id="rec-dot"></span> INICIAR GRAVAÇÃO
     </button>
     
-    <div class="rec-list" id="file-list"></div>
+    <div class="clabel2" style="margin-top:16px; border-bottom:1px solid var(--border); padding-bottom:4px">Arquivos Salvos</div>
+    <div class="rec-list" id="file-list">
+      <div id="empty-rec" style="font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;padding:14px;border:1px dashed var(--border2);border-radius:6px;background:rgba(255,255,255,0.02)">
+        Nenhum áudio gerado ainda.<br>Grave algo para liberar o botão de download/compartilhamento.
+      </div>
+    </div>
   </div>
 
 </div>
@@ -204,20 +212,24 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 <script>
 'use strict';
 // ═══════════════════════ CORE SYSTEM & ROUTING ═══════════════════════
-let AC = null;
+let AC = null, masterAn = null;
 let micStream = null, micSource = null, micAn = null, micActive = false;
-let micFilter = null, micGainNode = null, micMonitorGain = null;
-let micDistortion = null, micLimiter = null, micHardClipper = null;
 
+// Nodes
+let micFilter = null, micGainNode = null, micMonitorGain = null, dspOutputGain = null;
+let doomBypassGain = null, doomActiveGain = null, micDistortion = null, micLimiter = null;
 let delayNode = null, delayFeedback = null, delayGate = null;
 let delayDryGain = null, delayWetGain = null, delayInputGain = null;
+let recorderScriptNode = null, micHardClipper = null;
 
-let recorderScriptNode = null;
+// Recorder variables
 let isRecording = false;
 let recordedChunks = [];
 
+// States
 let isMicFilterOn = false, isMicMonitorOn = false, isDoomModeOn = false, isDelayOn = false;
 
+// Utils
 function fLog(v, lo, hi) { return Math.pow(10, (v / 100) * (Math.log10(hi) - Math.log10(lo)) + Math.log10(lo)); }
 function noteStr(f) {
   if (f <= 0) return '—';
@@ -228,67 +240,62 @@ function noteStr(f) {
 
 let fbT = null;
 function FB(msg, col = 'var(--cyan)') {
-  const el = document.getElementById('fb-toast');
-  el.textContent = msg; el.style.color = col; el.style.borderColor = col;
-  el.classList.add('show');
-  clearTimeout(fbT); fbT = setTimeout(() => el.classList.remove('show'), 2000);
+  const el = document.getElementById('fb-toast'); el.textContent = msg; el.style.color = col; el.style.borderColor = col;
+  el.classList.add('show'); clearTimeout(fbT); fbT = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
+// Inicializa a Engine com o workaround para iOS
 function getAC() {
   if (!AC || AC.state === 'closed') {
-    // Força 48kHz para o WAV gerado ser padrão de vídeo/PA
     AC = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
     const uo = AC.createOscillator(), ug = AC.createGain();
     ug.gain.value = 0; uo.connect(ug); ug.connect(AC.destination);
     uo.start(0); uo.stop(AC.currentTime + 0.1);
   }
   if (AC.state === 'suspended') AC.resume();
-  document.getElementById('ctx-dot').className = 'dot on';
-  document.getElementById('ctx-st').textContent = 'ONLINE';
+  document.getElementById('ctx-dot').className = 'dot on'; document.getElementById('ctx-st').textContent = 'ONLINE';
   return AC;
 }
 
 document.body.addEventListener('touchstart', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
 
 async function globalAudioReset() {
-  if (micActive) stopMic();
-  if (isRecording) toggleRecord();
+  if (micActive) stopMic(); if (isRecording) toggleRecord();
   if (AC) { try { await AC.close(); } catch (e) { } AC = null; }
-  getAC(); FB('DSP REINICIADO');
+  getAC(); FB('DSP REINICIADO - Sistema limpo');
 }
 
 function makeDistortionCurve(amount) {
   let k = amount, n = 44100, curve = new Float32Array(n), deg = Math.PI / 180;
-  for (let i = 0; i < n; ++i) {
-    let x = i * 2 / n - 1;
-    curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
-  }
+  for (let i = 0; i < n; ++i) { let x = i * 2 / n - 1; curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x)); }
   return curve;
 }
 
-// Uma curva mais suave para o gate não distorcer brutalmente a transiente do delay
+// Curva de Expander/Gate mais suave para não mutilar a microfonia
 function makeGateCurve(thresholdDB) {
   const curve = new Float32Array(8192);
   const thrLin = Math.pow(10, thresholdDB / 20);
   for (let i = 0; i < 8192; i++) {
     const x = (i * 2) / 8192 - 1;
-    // Suaviza a transição do gate (expander)
-    if (Math.abs(x) < thrLin) {
-      curve[i] = x * 0.1; // Atenua ao invés de mutar 100% para soar mais natural
-    } else {
-      curve[i] = x;
-    }
+    if (Math.abs(x) < thrLin) { curve[i] = x * 0.1; } else { curve[i] = x; }
   }
   return curve;
 }
 
-// ═══════════════════════ MIC / DSP ENGINE ═══════════════════════
+// ═══════════════════════ ENGINE DE ÁUDIO ═══════════════════════
 async function startMic() {
   try {
     const c = getAC();
     micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    
+    // HACK IOS: Anexa o stream a um elemento HTML Audio mutado para que o OS libere a saída física!
+    const iosAudioHack = new Audio();
+    iosAudioHack.autoplay = true; iosAudioHack.playsInline = true; iosAudioHack.muted = true;
+    iosAudioHack.srcObject = micStream;
+
     micSource = c.createMediaStreamSource(micStream);
 
+    // 1. Isolador BPF
     micFilter = c.createBiquadFilter();
     micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass';
     micFilter.frequency.value = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
@@ -297,93 +304,80 @@ async function startMic() {
     micGainNode = c.createGain(); 
     micAn = c.createAnalyser(); micAn.fftSize = 4096;
 
-    micDistortion = c.createWaveShaper();
-    micDistortion.curve = isDoomModeOn ? makeDistortionCurve(+document.getElementById('mic-drive').value) : makeDistortionCurve(0);
-
-    micLimiter = c.createDynamicsCompressor();
-    micLimiter.threshold.value = isDoomModeOn ? -3 : 0;
-    micLimiter.knee.value = 0; micLimiter.ratio.value = 20;
-    micLimiter.attack.value = 0.001; micLimiter.release.value = 0.1;
-
-    delayInputGain = c.createGain(); delayInputGain.gain.value = 1;
-    delayGate = c.createWaveShaper(); 
-    delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
+    // 2. Doom Split (Garante Bypass 100% limpo quando OFF)
+    doomBypassGain = c.createGain(); doomBypassGain.gain.value = isDoomModeOn ? 0 : 1;
+    doomActiveGain = c.createGain(); doomActiveGain.gain.value = isDoomModeOn ? 1 : 0;
     
-    delayNode = c.createDelay(3.0); 
-    delayNode.delayTime.value = (+document.getElementById('dly-rate').value) / 1000;
-    
-    delayFeedback = c.createGain(); 
-    delayFeedback.gain.value = (+document.getElementById('dly-fb').value) / 100;
+    micDistortion = c.createWaveShaper(); micDistortion.curve = makeDistortionCurve(+document.getElementById('mic-drive').value);
+    micLimiter = c.createDynamicsCompressor(); micLimiter.threshold.value = -3; micLimiter.knee.value = 0; micLimiter.ratio.value = 20; micLimiter.attack.value = 0.001; micLimiter.release.value = 0.1;
+
+    // 3. Delay
+    delayInputGain = c.createGain(); 
+    delayGate = c.createWaveShaper(); delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
+    delayNode = c.createDelay(3.0); delayNode.delayTime.value = (+document.getElementById('dly-rate').value) / 1000;
+    delayFeedback = c.createGain(); delayFeedback.gain.value = (+document.getElementById('dly-fb').value) / 100;
     
     delayDryGain = c.createGain(); delayWetGain = c.createGain();
     const mix = +document.getElementById('dly-mix').value / 100;
     delayDryGain.gain.value = isDelayOn ? 1 - mix : 1;
     delayWetGain.gain.value = isDelayOn ? mix : 0;
 
-    micMonitorGain = c.createGain(); 
-    micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
+    // 4. Output / Rec Merge
+    dspOutputGain = c.createGain();
+    micMonitorGain = c.createGain(); micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
+    micHardClipper = c.createWaveShaper(); micHardClipper.curve = new Float32Array([-1, 1]);
 
-    // ROTEAMENTO DE GRAVAÇÃO SEGURO PARA iOS
+    // ROTEAMENTO DE GRAVAÇÃO (iOS Safe)
     recorderScriptNode = c.createScriptProcessor(4096, 1, 1);
     recorderScriptNode.onaudioprocess = function(e) {
-      const input = e.inputBuffer.getChannelData(0);
-      const output = e.outputBuffer.getChannelData(0);
-      
-      if(isRecording) {
-        recordedChunks.push(new Float32Array(input));
-      }
-      
-      // OBRIGATÓRIO no iOS: Passar sinal vazio adiante para não matar a thread
-      output.fill(0);
+      if(isRecording) { recordedChunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); }
+      e.outputBuffer.getChannelData(0).fill(0); // Passa zeros silenciosos apenas p manter a thread viva no iOS
     };
 
-    micHardClipper = c.createWaveShaper();
-    micHardClipper.curve = new Float32Array([-1, 1]);
-
-    // O CABEAMENTO MASTER (Split paralelo para não engasgar a monitoração)
+    // CONEXÕES FÍSICAS REAIS
     micSource.connect(micFilter);
     micFilter.connect(micGainNode);
-    micGainNode.connect(micAn); // P/ Gráfico
-    
+    micGainNode.connect(micAn); // Visor RTA
+
+    // Split Doom
+    micGainNode.connect(doomBypassGain);
+    doomBypassGain.connect(delayInputGain);
+
     micGainNode.connect(micDistortion);
     micDistortion.connect(micLimiter);
-    micLimiter.connect(delayInputGain);
+    micLimiter.connect(doomActiveGain);
+    doomActiveGain.connect(delayInputGain);
 
-    delayInputGain.connect(delayDryGain);
-    delayDryGain.connect(micMonitorGain);
+    // Split Delay -> DSP Output
+    delayInputGain.connect(delayDryGain); delayDryGain.connect(dspOutputGain);
+    delayInputGain.connect(delayGate); delayGate.connect(delayNode); delayNode.connect(delayFeedback); delayFeedback.connect(delayNode);
+    delayNode.connect(delayWetGain); delayWetGain.connect(dspOutputGain);
 
-    delayInputGain.connect(delayGate);
-    delayGate.connect(delayNode);
-    delayNode.connect(delayFeedback);
-    delayFeedback.connect(delayNode);
-    delayNode.connect(delayWetGain);
-    delayWetGain.connect(micMonitorGain);
-
-    // Monitor divide para a saída física e para o gravador separadamente
+    // Dsp Output -> Monitor -> Hardware Speaker
+    dspOutputGain.connect(micMonitorGain);
     micMonitorGain.connect(micHardClipper);
-    micHardClipper.connect(c.destination); // Ouve-se por aqui
+    micHardClipper.connect(c.destination);
 
-    micMonitorGain.connect(recorderScriptNode);
-    recorderScriptNode.connect(c.destination); // Nó fantasma p/ manter o script vivo
+    // Dsp Output -> Gravador (Acontece independente do volume do monitor)
+    dspOutputGain.connect(recorderScriptNode);
+    recorderScriptNode.connect(c.destination);
 
     micActive = true;
-    const btn = document.getElementById('mic-btn');
-    btn.innerHTML = '🔴 PARAR MICROFONE'; btn.className = 'btn btn-r';
+    const btn = document.getElementById('mic-btn'); btn.innerHTML = '🔴 PARAR MICROFONE'; btn.className = 'btn btn-r';
     drawMicSpec();
-  } catch (e) { FB('Falha no acesso ao microfone', 'var(--red)'); }
+  } catch (e) { FB('Falha no acesso ao microfone. Verifique as permissões.', 'var(--red)'); }
 }
 
 function stopMic() {
   if (micStream) micStream.getTracks().forEach(t => t.stop());
   if (isRecording) toggleRecord(); 
   micStream = null; micSource = null; micAn = null; micActive = false;
-  const btn = document.getElementById('mic-btn');
-  btn.innerHTML = '🎙 LIGAR MICROFONE'; btn.className = 'btn btn-c';
+  const btn = document.getElementById('mic-btn'); btn.innerHTML = '🎙 LIGAR MICROFONE'; btn.className = 'btn btn-c';
   document.getElementById('mic-freq').textContent = '—'; document.getElementById('mic-db').textContent = '— dBFS'; document.getElementById('mic-vu').style.width = '0%';
 }
 function toggleMic() { if (micActive) stopMic(); else startMic(); }
 
-// UI CONTROLS
+// ═══════════════════════ UI & DSP CONTROLS ═══════════════════════
 function toggleMicFilter() {
   isMicFilterOn = !isMicFilterOn;
   const btn = document.getElementById('bp-toggle'); btn.textContent = isMicFilterOn ? 'ON' : 'OFF'; btn.className = isMicFilterOn ? 'chip chip-xs on' : 'chip chip-xs';
@@ -393,7 +387,7 @@ function toggleMicFilter() {
 function updateMicFilter() {
   const f = fLog(+document.getElementById('mic-bp-f').value, 20, 20000), q = +document.getElementById('mic-bp-q').value;
   document.getElementById('bp-f-val').textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'kHz' : Math.round(f) + 'Hz'; document.getElementById('bp-q-val').textContent = 'Q: ' + q;
-  if (micFilter) { micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); micFilter.Q.setTargetAtTime(q, AC.currentTime, 0.05); }
+  if (micFilter && AC) { micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); micFilter.Q.setTargetAtTime(q, AC.currentTime, 0.05); }
 }
 
 function toggleDelay() {
@@ -418,21 +412,25 @@ function toggleDoomMode() {
   isDoomModeOn = !isDoomModeOn;
   const btn = document.getElementById('doom-toggle'); btn.textContent = isDoomModeOn ? 'ON' : 'OFF'; btn.className = isDoomModeOn ? 'chip chip-xs on-r' : 'chip chip-xs';
   document.getElementById('mic-drive').disabled = !isDoomModeOn;
-  if (micLimiter) micLimiter.threshold.setTargetAtTime(isDoomModeOn ? -3 : 0, AC.currentTime, 0.05);
+  
+  if(AC && doomBypassGain) {
+    doomBypassGain.gain.setTargetAtTime(isDoomModeOn ? 0 : 1, AC.currentTime, 0.05);
+    doomActiveGain.gain.setTargetAtTime(isDoomModeOn ? 1 : 0, AC.currentTime, 0.05);
+  }
   updateDoomMode();
-  if (isDoomModeOn) FB('DOOM Mode Ativado 🔥', 'var(--red)');
+  if (isDoomModeOn) FB('DOOM MODE ON: Roteamento Distorcido', 'var(--red)');
 }
 function updateDoomMode() {
   const drive = +document.getElementById('mic-drive').value;
-  document.getElementById('drive-val').textContent = drive + '%';
-  if (micDistortion) micDistortion.curve = isDoomModeOn ? makeDistortionCurve(drive) : makeDistortionCurve(0);
+  document.getElementById('drive-val').textContent = drive + '% Drive';
+  if (micDistortion) micDistortion.curve = makeDistortionCurve(drive);
 }
 
 function toggleMicMonitor() {
   isMicMonitorOn = !isMicMonitorOn;
   const btn = document.getElementById('mon-btn'); btn.textContent = isMicMonitorOn ? 'ON' : 'OFF'; btn.className = isMicMonitorOn ? 'chip on-r' : 'chip';
-  if (micMonitorGain) micMonitorGain.gain.setTargetAtTime(isMicMonitorOn ? 1 : 0, AC.currentTime, 0.05);
-  if (isMicMonitorOn) FB('Monitoração Aberta', 'var(--cyan)');
+  if (micMonitorGain && AC) micMonitorGain.gain.setTargetAtTime(isMicMonitorOn ? 1 : 0, AC.currentTime, 0.05);
+  if (isMicMonitorOn) FB('Sinal enviado para a Saída Principal', 'var(--green)');
 }
 
 // ═══════════════════════ RTA VISUALIZER ═══════════════════════
@@ -483,9 +481,9 @@ function drawMicSpec() {
   }
 }
 
-// ═══════════════════════ WAV RECORDER & SHARE (iOS Fix) ═══════════════════════
+// ═══════════════════════ WAV RECORDER (iOS Compartilhamento) ═══════════════════════
 function toggleRecord() {
-  if(!micActive) { FB('Ligue o microfone primeiro', 'var(--red)'); return; }
+  if(!micActive) { FB('Ligue o microfone RTA primeiro', 'var(--red)'); return; }
   
   isRecording = !isRecording;
   const btn = document.getElementById('rec-btn');
@@ -493,21 +491,24 @@ function toggleRecord() {
   
   if (isRecording) {
     recordedChunks = [];
-    btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
-    dot.style.background = 'var(--green)';
-    btn.innerHTML = `<span class="dot on" style="background:var(--green)"></span> GRAVANDO... (PARAR)`;
-    FB('Gravação iniciada', 'var(--green)');
+    btn.style.borderColor = 'var(--cyan)'; btn.style.color = 'var(--cyan)';
+    dot.style.background = 'var(--cyan)';
+    btn.innerHTML = `<span class="dot on" style="background:var(--cyan)"></span> GRAVANDO O FLUXO... (CLIQUE P/ PARAR E SALVAR)`;
+    FB('Iniciando captura RAW na memória', 'var(--cyan)');
   } else {
     btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
     dot.style.background = 'var(--red)';
     btn.innerHTML = `<span class="dot" style="background:var(--red)"></span> INICIAR GRAVAÇÃO`;
     
-    if (recordedChunks.length > 0) { processWAV(); }
+    if (recordedChunks.length > 0) {
+      document.getElementById('empty-rec').style.display = 'none'; // Some com a placeholder
+      processWAV(); 
+    }
   }
 }
 
 function processWAV() {
-  FB('Processando WAV...', 'var(--cyan)');
+  FB('Construindo arquivo WAV de 24-bits...', 'var(--green)');
   setTimeout(() => {
     let totalLen = 0;
     recordedChunks.forEach(c => totalLen += c.length);
@@ -516,18 +517,10 @@ function processWAV() {
     const view = new DataView(buffer);
     const writeString = (off, str) => { for(let i=0; i<str.length; i++) view.setUint8(off+i, str.charCodeAt(i)); };
     
-    writeString(0, 'RIFF');
-    view.setUint32(4, 36 + totalLen * 3, true);
-    writeString(8, 'WAVE'); writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // Mono
-    view.setUint32(24, 48000, true); // 48kHz fixos
-    view.setUint32(28, 48000 * 3, true);
-    view.setUint16(32, 3, true); 
-    view.setUint16(34, 24, true); // 24-bit
-    writeString(36, 'data');
-    view.setUint32(40, totalLen * 3, true);
+    writeString(0, 'RIFF'); view.setUint32(4, 36 + totalLen * 3, true); writeString(8, 'WAVE'); writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); 
+    view.setUint32(24, 48000, true); view.setUint32(28, 48000 * 3, true);
+    view.setUint16(32, 3, true); view.setUint16(34, 24, true); writeString(36, 'data'); view.setUint32(40, totalLen * 3, true);
 
     let offset = 44;
     for (let i = 0; i < recordedChunks.length; i++) {
@@ -535,9 +528,7 @@ function processWAV() {
       for (let j = 0; j < chunk.length; j++) {
         let s = Math.max(-1, Math.min(1, chunk[j]));
         s = s < 0 ? s * 0x800000 : s * 0x7FFFFF; 
-        view.setInt8(offset, s & 0xFF);
-        view.setInt8(offset + 1, (s >> 8) & 0xFF);
-        view.setInt8(offset + 2, (s >> 16) & 0xFF);
+        view.setInt8(offset, s & 0xFF); view.setInt8(offset + 1, (s >> 8) & 0xFF); view.setInt8(offset + 2, (s >> 16) & 0xFF);
         offset += 3;
       }
     }
@@ -556,38 +547,31 @@ function addFileToList(blob, samples) {
   const list = document.getElementById('file-list');
   const item = document.createElement('div');
   item.className = 'rec-item';
-  
-  // Usamos um botão de acionamento que tentará invocar a API de Share do iOS
   const btnId = 'share-' + Date.now();
   
   item.innerHTML = `
     <div class="rec-info">
       <div class="rec-name">${name}</div>
-      <div class="rec-meta">${dur}s • ${mb} MB • WAV 24-bit</div>
+      <div class="rec-meta">${dur}s • ${mb} MB • WAV PCM 24b</div>
     </div>
-    <button id="${btnId}" class="btn btn-c btn-sm">SALVAR</button>
+    <button id="${btnId}" class="btn btn-c btn-sm" style="padding:6px 14px">SALVAR 📥</button>
   `;
   list.prepend(item);
   
+  // Função mista de Share Nativo do iOS e Download Padrão
   document.getElementById(btnId).onclick = async () => {
     const file = new File([blob], name, { type: 'audio/wav' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-          title: name,
-          text: 'Gravação HyperFocus DSP'
-        });
-      } catch (err) { console.log('Share cancelado', err); }
+      try { await navigator.share({ files: [file], title: name }); FB('Concluído!', 'var(--green)'); } 
+      catch (err) { console.log('Share cancelado'); }
     } else {
-      // Fallback para navegadores de PC ou velhos
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = name; a.click();
+      const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+      FB('Download Iniciado', 'var(--cyan)');
     }
   };
   
-  FB('Pronto! Clique em SALVAR para escolher a pasta', 'var(--green)');
+  FB('Pronto! Pressione SALVAR na lista.', 'var(--green)');
 }
 </script>
 </body>
