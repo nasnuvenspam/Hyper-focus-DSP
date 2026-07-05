@@ -12,9 +12,7 @@
   --bg:#040914;--surface:#0A1220;--panel:#111B2D;--panel2:#18253A;
   --border:#20304C;--border2:#2A3F60;
   --cyan:#00E5FF;--cyan-dim:#005566;--cyan-glow:rgba(0, 229, 255, 0.15);
-  --blue:#4FC3F7;
-  --green:#00FF88;
-  --amber:#F5A623;
+  --blue:#4FC3F7;--green:#00FF88;--amber:#F5A623;
   --violet:#B388FF;--violet-glow:rgba(179, 136, 255, 0.15);
   --red:#FF3B30;--red-glow:rgba(255, 59, 48, 0.15);
   --text:#E8E8F2;--muted:#6C84A3;--muted2:#8C9EB5;
@@ -44,10 +42,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:
 .rlabs{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted)}
 .btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;border-radius:8px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:transform .1s;text-transform:uppercase}
 .btn:active{transform:scale(.97)}
-.btn-c{background:var(--cyan);color:#000}
-.btn-r{background:var(--red);color:#fff}
-.btn-x{background:var(--panel2);border:1px solid var(--border2);color:var(--text)}
-.btn-sm{padding:8px 12px;font-size:9px;width:auto}
+.btn-c{background:var(--cyan);color:#000} .btn-r{background:var(--red);color:#fff} .btn-x{background:var(--panel2);border:1px solid var(--border2);color:var(--text)} .btn-sm{padding:8px 12px;font-size:9px;width:auto}
 
 /* GRIDS */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -127,10 +122,10 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 
   <div class="card">
     <div class="clabel">DSP & Roteamento Dinâmico</div>
-    <div class="warn-box">A monitoração direciona o fluxo para os fones de ouvido. Utilize o Isolador (BPF) para varrer microfonias ou o Gated Delay + Doom Mode para design sonoro via feedback.</div>
+    <div class="warn-box">⚠ A monitoração injeta o sinal nos fones ou alto-falante. Para forçar o feedback contínuo (Doom Mode), aproxime os fones do microfone do celular. O iOS bloqueia microfonia feita pelos próprios alto-falantes internos.</div>
     
     <div class="row" style="justify-content:space-between; margin-bottom:12px">
-      <div class="clabel2" style="margin:0; color:var(--text); font-size:10px">Monitoração Direta</div>
+      <div class="clabel2" style="margin:0; color:var(--text); font-size:10px">Monitoração Principal</div>
       <button class="chip" id="mon-btn" onclick="toggleMicMonitor()" style="width:60px">OFF</button>
     </div>
 
@@ -163,8 +158,8 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
       </div>
       <div>
         <div class="clabel2">Feedback</div>
-        <input type="range" class="ri" id="dly-fb" min="0" max="95" step="1" value="40" oninput="updateDelay()" disabled>
-        <div class="rlabs"><span>0%</span><span id="dly-fb-v">40%</span></div>
+        <input type="range" class="ri" id="dly-fb" min="0" max="95" step="1" value="60" oninput="updateDelay()" disabled>
+        <div class="rlabs"><span>0%</span><span id="dly-fb-v">60%</span></div>
       </div>
       <div>
         <div class="clabel2">Dry / Wet</div>
@@ -184,7 +179,7 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
       <div class="clabel2" style="margin:0; color:var(--red)">3. Doom Mode (Drive + Limiter)</div>
       <button class="chip chip-xs" id="doom-toggle" onclick="toggleDoomMode()" style="width:50px">OFF</button>
     </div>
-    <div style="font-size:9px; color:var(--muted); margin:6px 0 10px">Segura retroalimentações críticas com um limiter brickwall (-3dB) enquanto aplica distorção harmônica.</div>
+    <div style="font-size:9px; color:var(--muted); margin:6px 0 10px">Limiter agressivo (-3dB) no master p/ garantir sustentação infinita sem romper alto-falantes.</div>
     <div>
       <input type="range" class="ri" id="mic-drive" min="0" max="100" step="1" value="20" oninput="updateDoomMode()" disabled>
       <div class="rlabs"><span>Clean</span><span id="drive-val">20% Drive</span></div>
@@ -192,8 +187,8 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
   </div>
 
   <div class="card">
-    <div class="clabel">Gravador 24-bit / 48kHz (Pós-FX)</div>
-    <div style="font-size:9px; color:var(--muted); margin-bottom:12px">Captura exatamente o fluxo do roteamento selecionado acima em formato WAV não-comprimido.</div>
+    <div class="clabel">Gravador Direto (WAV PCM 24-bit)</div>
+    <div style="font-size:9px; color:var(--muted); margin-bottom:12px">Captura fiel do monitoramento (incluindo Delay e Saturação). Pode ser salvo direto no app Arquivos do iOS.</div>
     <button class="btn btn-x" id="rec-btn" onclick="toggleRecord()" style="border-color:var(--red); color:var(--red)">
       <span class="dot" style="background:var(--red)" id="rec-dot"></span> INICIAR GRAVAÇÃO
     </button>
@@ -209,22 +204,18 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 <script>
 'use strict';
 // ═══════════════════════ CORE SYSTEM & ROUTING ═══════════════════════
-let AC = null, masterAn = null;
+let AC = null;
 let micStream = null, micSource = null, micAn = null, micActive = false;
 let micFilter = null, micGainNode = null, micMonitorGain = null;
 let micDistortion = null, micLimiter = null, micHardClipper = null;
 
-// Delay Nodes
 let delayNode = null, delayFeedback = null, delayGate = null;
 let delayDryGain = null, delayWetGain = null, delayInputGain = null;
 
-// Record Nodes
 let recorderScriptNode = null;
 let isRecording = false;
 let recordedChunks = [];
-let recordingStartTime = 0;
 
-// States
 let isMicFilterOn = false, isMicMonitorOn = false, isDoomModeOn = false, isDelayOn = false;
 
 function fLog(v, lo, hi) { return Math.pow(10, (v / 100) * (Math.log10(hi) - Math.log10(lo)) + Math.log10(lo)); }
@@ -243,9 +234,9 @@ function FB(msg, col = 'var(--cyan)') {
   clearTimeout(fbT); fbT = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-// Inicializa o Contexto em 48kHz cravados para garantir o WAV 48k
 function getAC() {
   if (!AC || AC.state === 'closed') {
+    // Força 48kHz para o WAV gerado ser padrão de vídeo/PA
     AC = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
     const uo = AC.createOscillator(), ug = AC.createGain();
     ug.gain.value = 0; uo.connect(ug); ug.connect(AC.destination);
@@ -258,7 +249,6 @@ function getAC() {
 }
 
 document.body.addEventListener('touchstart', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
-document.body.addEventListener('mousedown', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
 
 async function globalAudioReset() {
   if (micActive) stopMic();
@@ -276,13 +266,18 @@ function makeDistortionCurve(amount) {
   return curve;
 }
 
+// Uma curva mais suave para o gate não distorcer brutalmente a transiente do delay
 function makeGateCurve(thresholdDB) {
-  const curve = new Float32Array(65536);
+  const curve = new Float32Array(8192);
   const thrLin = Math.pow(10, thresholdDB / 20);
-  for (let i = 0; i < 65536; i++) {
-    const x = (i * 2) / 65536 - 1;
-    // Hard gate
-    curve[i] = Math.abs(x) < thrLin ? 0 : x;
+  for (let i = 0; i < 8192; i++) {
+    const x = (i * 2) / 8192 - 1;
+    // Suaviza a transição do gate (expander)
+    if (Math.abs(x) < thrLin) {
+      curve[i] = x * 0.1; // Atenua ao invés de mutar 100% para soar mais natural
+    } else {
+      curve[i] = x;
+    }
   }
   return curve;
 }
@@ -294,7 +289,6 @@ async function startMic() {
     micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
     micSource = c.createMediaStreamSource(micStream);
 
-    // 1. ISOLATOR (EQ)
     micFilter = c.createBiquadFilter();
     micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass';
     micFilter.frequency.value = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
@@ -303,7 +297,6 @@ async function startMic() {
     micGainNode = c.createGain(); 
     micAn = c.createAnalyser(); micAn.fftSize = 4096;
 
-    // 2. DOOM MODE
     micDistortion = c.createWaveShaper();
     micDistortion.curve = isDoomModeOn ? makeDistortionCurve(+document.getElementById('mic-drive').value) : makeDistortionCurve(0);
 
@@ -312,7 +305,6 @@ async function startMic() {
     micLimiter.knee.value = 0; micLimiter.ratio.value = 20;
     micLimiter.attack.value = 0.001; micLimiter.release.value = 0.1;
 
-    // 3. GATED DELAY SYSTEM
     delayInputGain = c.createGain(); delayInputGain.gain.value = 1;
     delayGate = c.createWaveShaper(); 
     delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
@@ -328,48 +320,51 @@ async function startMic() {
     delayDryGain.gain.value = isDelayOn ? 1 - mix : 1;
     delayWetGain.gain.value = isDelayOn ? mix : 0;
 
-    // 4. MONITOR & RECORDER & SAFETY
     micMonitorGain = c.createGain(); 
     micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
 
+    // ROTEAMENTO DE GRAVAÇÃO SEGURO PARA iOS
     recorderScriptNode = c.createScriptProcessor(4096, 1, 1);
     recorderScriptNode.onaudioprocess = function(e) {
-      if(!isRecording) return;
-      const inputData = e.inputBuffer.getChannelData(0);
-      recordedChunks.push(new Float32Array(inputData));
+      const input = e.inputBuffer.getChannelData(0);
+      const output = e.outputBuffer.getChannelData(0);
+      
+      if(isRecording) {
+        recordedChunks.push(new Float32Array(input));
+      }
+      
+      // OBRIGATÓRIO no iOS: Passar sinal vazio adiante para não matar a thread
+      output.fill(0);
     };
 
     micHardClipper = c.createWaveShaper();
     micHardClipper.curve = new Float32Array([-1, 1]);
 
-    // WIRING
+    // O CABEAMENTO MASTER (Split paralelo para não engasgar a monitoração)
     micSource.connect(micFilter);
     micFilter.connect(micGainNode);
-    micGainNode.connect(micAn); // To visualizer
-
-    // Doom Path
+    micGainNode.connect(micAn); // P/ Gráfico
+    
     micGainNode.connect(micDistortion);
     micDistortion.connect(micLimiter);
-
-    // Delay Branching
     micLimiter.connect(delayInputGain);
-    
-    // Dry path
+
     delayInputGain.connect(delayDryGain);
     delayDryGain.connect(micMonitorGain);
 
-    // Wet path
     delayInputGain.connect(delayGate);
     delayGate.connect(delayNode);
     delayNode.connect(delayFeedback);
-    delayFeedback.connect(delayNode); // Feedback loop
+    delayFeedback.connect(delayNode);
     delayNode.connect(delayWetGain);
     delayWetGain.connect(micMonitorGain);
 
-    // Output Stage
+    // Monitor divide para a saída física e para o gravador separadamente
+    micMonitorGain.connect(micHardClipper);
+    micHardClipper.connect(c.destination); // Ouve-se por aqui
+
     micMonitorGain.connect(recorderScriptNode);
-    recorderScriptNode.connect(micHardClipper);
-    micHardClipper.connect(c.destination);
+    recorderScriptNode.connect(c.destination); // Nó fantasma p/ manter o script vivo
 
     micActive = true;
     const btn = document.getElementById('mic-btn');
@@ -380,13 +375,11 @@ async function startMic() {
 
 function stopMic() {
   if (micStream) micStream.getTracks().forEach(t => t.stop());
-  if (isRecording) toggleRecord(); // Força parada de gravação se mic desligar
+  if (isRecording) toggleRecord(); 
   micStream = null; micSource = null; micAn = null; micActive = false;
   const btn = document.getElementById('mic-btn');
   btn.innerHTML = '🎙 LIGAR MICROFONE'; btn.className = 'btn btn-c';
-  document.getElementById('mic-freq').textContent = '—';
-  document.getElementById('mic-db').textContent = '— dBFS';
-  document.getElementById('mic-vu').style.width = '0%';
+  document.getElementById('mic-freq').textContent = '—'; document.getElementById('mic-db').textContent = '— dBFS'; document.getElementById('mic-vu').style.width = '0%';
 }
 function toggleMic() { if (micActive) stopMic(); else startMic(); }
 
@@ -412,7 +405,6 @@ function toggleDelay() {
 function updateDelay() {
   const rate = +document.getElementById('dly-rate').value, fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value, thr = +document.getElementById('dly-thr').value;
   document.getElementById('dly-rate-v').textContent = rate + 'ms'; document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; document.getElementById('dly-thr-v').textContent = thr + 'dB';
-  
   if (AC && delayNode) {
     delayNode.delayTime.setTargetAtTime(rate / 1000, AC.currentTime, 0.05);
     delayFeedback.gain.setTargetAtTime(fb / 100, AC.currentTime, 0.05);
@@ -432,7 +424,7 @@ function toggleDoomMode() {
 }
 function updateDoomMode() {
   const drive = +document.getElementById('mic-drive').value;
-  document.getElementById('drive-val').textContent = drive + '% Drive';
+  document.getElementById('drive-val').textContent = drive + '%';
   if (micDistortion) micDistortion.curve = isDoomModeOn ? makeDistortionCurve(drive) : makeDistortionCurve(0);
 }
 
@@ -440,7 +432,7 @@ function toggleMicMonitor() {
   isMicMonitorOn = !isMicMonitorOn;
   const btn = document.getElementById('mon-btn'); btn.textContent = isMicMonitorOn ? 'ON' : 'OFF'; btn.className = isMicMonitorOn ? 'chip on-r' : 'chip';
   if (micMonitorGain) micMonitorGain.gain.setTargetAtTime(isMicMonitorOn ? 1 : 0, AC.currentTime, 0.05);
-  if (isMicMonitorOn) FB('Fones Ativados. Cuidado com o volume.', 'var(--cyan)');
+  if (isMicMonitorOn) FB('Monitoração Aberta', 'var(--cyan)');
 }
 
 // ═══════════════════════ RTA VISUALIZER ═══════════════════════
@@ -449,11 +441,11 @@ function resCvs() { if (cvs.offsetWidth > 0) { cvs.width = cvs.offsetWidth * dev
 window.addEventListener('resize', resCvs); setTimeout(resCvs, 100);
 
 function getZoneColor(f) {
-  if (f < 250) return [79, 195, 247];       // Blue
-  if (f < 500) return [0, 229, 255];        // Cyan
-  if (f < 2000) return [0, 255, 136];       // Green
-  if (f < 5000) return [245, 166, 35];      // Amber
-  return [179, 136, 255];                   // Violet
+  if (f < 250) return [79, 195, 247];       
+  if (f < 500) return [0, 229, 255];        
+  if (f < 2000) return [0, 255, 136];       
+  if (f < 5000) return [245, 166, 35];      
+  return [179, 136, 255];                   
 }
 
 function drawMicSpec() {
@@ -491,7 +483,7 @@ function drawMicSpec() {
   }
 }
 
-// ═══════════════════════ WAV RECORDER (24-bit PCM) ═══════════════════════
+// ═══════════════════════ WAV RECORDER & SHARE (iOS Fix) ═══════════════════════
 function toggleRecord() {
   if(!micActive) { FB('Ligue o microfone primeiro', 'var(--red)'); return; }
   
@@ -501,44 +493,38 @@ function toggleRecord() {
   
   if (isRecording) {
     recordedChunks = [];
-    recordingStartTime = AC.currentTime;
     btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
     dot.style.background = 'var(--green)';
-    btn.innerHTML = `<span class="dot on" style="background:var(--green)"></span> GRAVANDO... (CLIQUE P/ PARAR)`;
+    btn.innerHTML = `<span class="dot on" style="background:var(--green)"></span> GRAVANDO... (PARAR)`;
     FB('Gravação iniciada', 'var(--green)');
   } else {
     btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
     dot.style.background = 'var(--red)';
     btn.innerHTML = `<span class="dot" style="background:var(--red)"></span> INICIAR GRAVAÇÃO`;
     
-    if (recordedChunks.length > 0) {
-      processWAV();
-    }
+    if (recordedChunks.length > 0) { processWAV(); }
   }
 }
 
 function processWAV() {
-  FB('Processando WAV 24-bit...', 'var(--cyan)');
+  FB('Processando WAV...', 'var(--cyan)');
   setTimeout(() => {
     let totalLen = 0;
     recordedChunks.forEach(c => totalLen += c.length);
     
-    // Create WAV Buffer
     const buffer = new ArrayBuffer(44 + totalLen * 3);
     const view = new DataView(buffer);
-    
     const writeString = (off, str) => { for(let i=0; i<str.length; i++) view.setUint8(off+i, str.charCodeAt(i)); };
     
     writeString(0, 'RIFF');
     view.setUint32(4, 36 + totalLen * 3, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
+    writeString(8, 'WAVE'); writeString(12, 'fmt ');
     view.setUint32(16, 16, true);
     view.setUint16(20, 1, true); // PCM
     view.setUint16(22, 1, true); // Mono
-    view.setUint32(24, 48000, true); // 48kHz
-    view.setUint32(28, 48000 * 3, true); // ByteRate
-    view.setUint16(32, 3, true); // BlockAlign
+    view.setUint32(24, 48000, true); // 48kHz fixos
+    view.setUint32(28, 48000 * 3, true);
+    view.setUint16(32, 3, true); 
     view.setUint16(34, 24, true); // 24-bit
     writeString(36, 'data');
     view.setUint32(40, totalLen * 3, true);
@@ -548,7 +534,7 @@ function processWAV() {
       const chunk = recordedChunks[i];
       for (let j = 0; j < chunk.length; j++) {
         let s = Math.max(-1, Math.min(1, chunk[j]));
-        s = s < 0 ? s * 0x800000 : s * 0x7FFFFF; // to 24-bit int
+        s = s < 0 ? s * 0x800000 : s * 0x7FFFFF; 
         view.setInt8(offset, s & 0xFF);
         view.setInt8(offset + 1, (s >> 8) & 0xFF);
         view.setInt8(offset + 2, (s >> 16) & 0xFF);
@@ -562,7 +548,6 @@ function processWAV() {
 }
 
 function addFileToList(blob, samples) {
-  const url = URL.createObjectURL(blob);
   const dur = (samples / 48000).toFixed(1);
   const mb = (blob.size / 1024 / 1024).toFixed(2);
   const now = new Date();
@@ -571,15 +556,38 @@ function addFileToList(blob, samples) {
   const list = document.getElementById('file-list');
   const item = document.createElement('div');
   item.className = 'rec-item';
+  
+  // Usamos um botão de acionamento que tentará invocar a API de Share do iOS
+  const btnId = 'share-' + Date.now();
+  
   item.innerHTML = `
     <div class="rec-info">
       <div class="rec-name">${name}</div>
-      <div class="rec-meta">${dur}s • ${mb} MB • 24-bit 48kHz</div>
+      <div class="rec-meta">${dur}s • ${mb} MB • WAV 24-bit</div>
     </div>
-    <a href="${url}" download="${name}" class="btn btn-c btn-sm" style="text-decoration:none">BAIXAR</a>
+    <button id="${btnId}" class="btn btn-c btn-sm">SALVAR</button>
   `;
   list.prepend(item);
-  FB('Arquivo pronto para baixar!', 'var(--green)');
+  
+  document.getElementById(btnId).onclick = async () => {
+    const file = new File([blob], name, { type: 'audio/wav' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: name,
+          text: 'Gravação HyperFocus DSP'
+        });
+      } catch (err) { console.log('Share cancelado', err); }
+    } else {
+      // Fallback para navegadores de PC ou velhos
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name; a.click();
+    }
+  };
+  
+  FB('Pronto! Clique em SALVAR para escolher a pasta', 'var(--green)');
 }
 </script>
 </body>
