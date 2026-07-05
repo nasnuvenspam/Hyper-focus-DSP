@@ -1,1 +1,586 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>HyperFocus DSP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#040914;--surface:#0A1220;--panel:#111B2D;--panel2:#18253A;
+  --border:#20304C;--border2:#2A3F60;
+  --cyan:#00E5FF;--cyan-dim:#005566;--cyan-glow:rgba(0, 229, 255, 0.15);
+  --blue:#4FC3F7;
+  --green:#00FF88;
+  --amber:#F5A623;
+  --violet:#B388FF;--violet-glow:rgba(179, 136, 255, 0.15);
+  --red:#FF3B30;--red-glow:rgba(255, 59, 48, 0.15);
+  --text:#E8E8F2;--muted:#6C84A3;--muted2:#8C9EB5;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+  --r:12px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+#app{display:flex;flex-direction:column;min-height:100dvh;max-width:520px;margin:0 auto;-webkit-user-select:none;user-select:none;padding-bottom:20px}
 
+/* HEADER */
+#hdr{position:sticky;top:0;z-index:100;background:rgba(10,18,32,0.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 16px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+#hdr h1{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.14em;color:var(--cyan);text-transform:uppercase}
+.hdr-sub{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;margin-top:2px}
+
+/* CARDS */
+.cnt{padding:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.clabel{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--muted2);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.clabel::before{content:'';display:block;width:4px;height:10px;background:var(--cyan);border-radius:2px}
+.clabel2{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+
+/* UI ELEMENTS */
+.ri{-webkit-appearance:none;width:100%;height:4px;background:var(--border);border-radius:2px;outline:none;cursor:pointer;margin:10px 0 4px}
+.ri::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan-glow);cursor:pointer;border:2px solid var(--surface)}
+.ri:disabled::-webkit-slider-thumb{background:var(--muted);box-shadow:none;border-color:var(--border)}
+.rlabs{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;border-radius:8px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:transform .1s;text-transform:uppercase}
+.btn:active{transform:scale(.97)}
+.btn-c{background:var(--cyan);color:#000}
+.btn-r{background:var(--red);color:#fff}
+.btn-x{background:var(--panel2);border:1px solid var(--border2);color:var(--text)}
+.btn-sm{padding:8px 12px;font-size:9px;width:auto}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row{display:flex;gap:10px;align-items:center}
+.chip{padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted2);font-family:var(--mono);font-size:9px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s}
+.chip.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow)}
+.chip.on-r{border-color:var(--red);color:var(--red);background:var(--red-glow)}
+.chip-xs{font-size:8px;padding:6px 8px}
+
+/* CANVAS & METERS */
+.cvs-box{width:100%;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:block}
+.vu-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0}
+.vu-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue) 0%,var(--cyan) 40%,var(--amber) 80%,var(--red) 100%);border-radius:3px;transition:width .05s linear}
+.ind{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
+.dot.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+
+/* SPECTRAL LEGEND */
+.leg-wrap{display:flex;justify-content:space-between;margin-top:8px;padding:0 4px}
+.leg-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.leg-c{width:16px;height:4px;border-radius:2px}
+.leg-t{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:.05em}
+
+/* FILE MANAGER */
+.rec-list{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.rec-item{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--border2);padding:10px 12px;border-radius:8px}
+.rec-info{display:flex;flex-direction:column;gap:3px}
+.rec-name{font-family:var(--mono);font-size:10px;color:var(--text);font-weight:600}
+.rec-meta{font-family:var(--mono);font-size:8px;color:var(--muted)}
+
+hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
+#peak-alert{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;padding:8px 12px;background:var(--red-glow);border:1px solid var(--red);border-radius:6px;color:var(--red);text-align:center;display:none;margin-bottom:10px}
+#peak-alert.show{display:block}
+.warn-box{background:var(--violet-glow);border:1px solid var(--violet);border-radius:6px;padding:10px;font-family:var(--mono);font-size:9px;color:var(--violet);margin-bottom:10px;line-height:1.5}
+#fb-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cyan);border-radius:8px;padding:10px 20px;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cyan);opacity:0;pointer-events:none;transition:opacity .2s;z-index:999;box-shadow:0 10px 20px rgba(0,0,0,0.5)}
+#fb-toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="hdr">
+  <div class="hdr-row">
+    <div><h1>HyperFocus</h1><div class="hdr-sub">RTA & SOUND DESIGN LAB</div></div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button class="btn btn-x btn-sm" onclick="globalAudioReset()">⚡ RESET</button>
+      <div class="ind"><span class="dot" id="ctx-dot"></span><span id="ctx-st" style="font-size:8px">OFFLINE</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="cnt">
+  
+  <div id="peak-alert">⚠ SATURAÇÃO CRÍTICA (CLIP) DETECTADA</div>
+  <div class="card">
+    <div class="clabel" style="margin-bottom:4px">Entrada de Áudio</div>
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-family:var(--mono);font-size:46px;font-weight:700;color:var(--cyan);letter-spacing:-2px;line-height:1" id="mic-freq">—</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px" id="mic-note">Aguardando Mic</div>
+      <div style="margin-top:6px"><span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="mic-db">— dBFS</span></div>
+    </div>
+    <div class="vu-wrap"><div class="vu-bar" id="mic-vu"></div></div>
+    <button class="btn btn-c" id="mic-btn" onclick="toggleMic()" style="margin-top:12px">🎙 LIGAR MICROFONE</button>
+  </div>
+
+  <div class="card">
+    <div class="clabel">Análise Espectral</div>
+    <canvas id="mic-spec" class="cvs-box" height="130"></canvas>
+    <div class="leg-wrap">
+      <div class="leg-item"><div class="leg-c" style="background:var(--blue)"></div><div class="leg-t">SUB/LOW</div></div>
+      <div class="leg-item"><div class="leg-c" style="background:var(--cyan)"></div><div class="leg-t">LO-MID</div></div>
+      <div class="leg-item"><div class="leg-c" style="background:var(--green)"></div><div class="leg-t">MID</div></div>
+      <div class="leg-item"><div class="leg-c" style="background:var(--amber)"></div><div class="leg-t">HI-MID</div></div>
+      <div class="leg-item"><div class="leg-c" style="background:var(--violet)"></div><div class="leg-t">HIGH</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">DSP & Roteamento Dinâmico</div>
+    <div class="warn-box">A monitoração direciona o fluxo para os fones de ouvido. Utilize o Isolador (BPF) para varrer microfonias ou o Gated Delay + Doom Mode para design sonoro via feedback.</div>
+    
+    <div class="row" style="justify-content:space-between; margin-bottom:12px">
+      <div class="clabel2" style="margin:0; color:var(--text); font-size:10px">Monitoração Direta</div>
+      <button class="chip" id="mon-btn" onclick="toggleMicMonitor()" style="width:60px">OFF</button>
+    </div>
+
+    <hr class="d">
+
+    <div class="row" style="justify-content:space-between">
+      <div class="clabel2" style="margin:0; color:var(--cyan)">1. Isolador (Bandpass)</div>
+      <button class="chip chip-xs" id="bp-toggle" onclick="toggleMicFilter()" style="width:50px">OFF</button>
+    </div>
+    <div style="margin-top:10px">
+      <input type="range" class="ri" id="mic-bp-f" min="0" max="100" step="0.1" value="50" oninput="updateMicFilter()" disabled>
+      <div class="rlabs"><span>20Hz</span><span id="bp-f-val">1kHz</span><span style="opacity:0">20kHz</span></div>
+    </div>
+    <div style="margin-top:6px">
+      <input type="range" class="ri" id="mic-bp-q" min="0.5" max="30" step="0.5" value="10" oninput="updateMicFilter()" disabled>
+      <div class="rlabs"><span>Largo</span><span id="bp-q-val">Q: 10</span></div>
+    </div>
+
+    <hr class="d">
+
+    <div class="row" style="justify-content:space-between">
+      <div class="clabel2" style="margin:0; color:var(--violet)">2. Gated Delay (Creative)</div>
+      <button class="chip chip-xs" id="dly-toggle" onclick="toggleDelay()" style="width:50px">OFF</button>
+    </div>
+    <div class="g2" style="margin-top:10px">
+      <div>
+        <div class="clabel2">Rate (Tempo)</div>
+        <input type="range" class="ri" id="dly-rate" min="10" max="1000" step="10" value="300" oninput="updateDelay()" disabled>
+        <div class="rlabs"><span>10ms</span><span id="dly-rate-v">300ms</span></div>
+      </div>
+      <div>
+        <div class="clabel2">Feedback</div>
+        <input type="range" class="ri" id="dly-fb" min="0" max="95" step="1" value="40" oninput="updateDelay()" disabled>
+        <div class="rlabs"><span>0%</span><span id="dly-fb-v">40%</span></div>
+      </div>
+      <div>
+        <div class="clabel2">Dry / Wet</div>
+        <input type="range" class="ri" id="dly-mix" min="0" max="100" step="1" value="50" oninput="updateDelay()" disabled>
+        <div class="rlabs"><span>Dry</span><span id="dly-mix-v">50%</span></div>
+      </div>
+      <div>
+        <div class="clabel2">Gate Threshold</div>
+        <input type="range" class="ri" id="dly-thr" min="-60" max="0" step="1" value="-30" oninput="updateDelay()" disabled>
+        <div class="rlabs"><span>-60dB</span><span id="dly-thr-v">-30dB</span></div>
+      </div>
+    </div>
+
+    <hr class="d">
+
+    <div class="row" style="justify-content:space-between">
+      <div class="clabel2" style="margin:0; color:var(--red)">3. Doom Mode (Drive + Limiter)</div>
+      <button class="chip chip-xs" id="doom-toggle" onclick="toggleDoomMode()" style="width:50px">OFF</button>
+    </div>
+    <div style="font-size:9px; color:var(--muted); margin:6px 0 10px">Segura retroalimentações críticas com um limiter brickwall (-3dB) enquanto aplica distorção harmônica.</div>
+    <div>
+      <input type="range" class="ri" id="mic-drive" min="0" max="100" step="1" value="20" oninput="updateDoomMode()" disabled>
+      <div class="rlabs"><span>Clean</span><span id="drive-val">20% Drive</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="clabel">Gravador 24-bit / 48kHz (Pós-FX)</div>
+    <div style="font-size:9px; color:var(--muted); margin-bottom:12px">Captura exatamente o fluxo do roteamento selecionado acima em formato WAV não-comprimido.</div>
+    <button class="btn btn-x" id="rec-btn" onclick="toggleRecord()" style="border-color:var(--red); color:var(--red)">
+      <span class="dot" style="background:var(--red)" id="rec-dot"></span> INICIAR GRAVAÇÃO
+    </button>
+    
+    <div class="rec-list" id="file-list"></div>
+  </div>
+
+</div>
+</div>
+
+<div id="fb-toast"></div>
+
+<script>
+'use strict';
+// ═══════════════════════ CORE SYSTEM & ROUTING ═══════════════════════
+let AC = null, masterAn = null;
+let micStream = null, micSource = null, micAn = null, micActive = false;
+let micFilter = null, micGainNode = null, micMonitorGain = null;
+let micDistortion = null, micLimiter = null, micHardClipper = null;
+
+// Delay Nodes
+let delayNode = null, delayFeedback = null, delayGate = null;
+let delayDryGain = null, delayWetGain = null, delayInputGain = null;
+
+// Record Nodes
+let recorderScriptNode = null;
+let isRecording = false;
+let recordedChunks = [];
+let recordingStartTime = 0;
+
+// States
+let isMicFilterOn = false, isMicMonitorOn = false, isDoomModeOn = false, isDelayOn = false;
+
+function fLog(v, lo, hi) { return Math.pow(10, (v / 100) * (Math.log10(hi) - Math.log10(lo)) + Math.log10(lo)); }
+function noteStr(f) {
+  if (f <= 0) return '—';
+  const ns = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const semi = Math.round(12 * Math.log2(f / 440));
+  return ns[((semi % 12) + 12) % 12] + (Math.floor((semi + 9) / 12) + 4);
+}
+
+let fbT = null;
+function FB(msg, col = 'var(--cyan)') {
+  const el = document.getElementById('fb-toast');
+  el.textContent = msg; el.style.color = col; el.style.borderColor = col;
+  el.classList.add('show');
+  clearTimeout(fbT); fbT = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// Inicializa o Contexto em 48kHz cravados para garantir o WAV 48k
+function getAC() {
+  if (!AC || AC.state === 'closed') {
+    AC = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
+    const uo = AC.createOscillator(), ug = AC.createGain();
+    ug.gain.value = 0; uo.connect(ug); ug.connect(AC.destination);
+    uo.start(0); uo.stop(AC.currentTime + 0.1);
+  }
+  if (AC.state === 'suspended') AC.resume();
+  document.getElementById('ctx-dot').className = 'dot on';
+  document.getElementById('ctx-st').textContent = 'ONLINE';
+  return AC;
+}
+
+document.body.addEventListener('touchstart', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
+document.body.addEventListener('mousedown', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
+
+async function globalAudioReset() {
+  if (micActive) stopMic();
+  if (isRecording) toggleRecord();
+  if (AC) { try { await AC.close(); } catch (e) { } AC = null; }
+  getAC(); FB('DSP REINICIADO');
+}
+
+function makeDistortionCurve(amount) {
+  let k = amount, n = 44100, curve = new Float32Array(n), deg = Math.PI / 180;
+  for (let i = 0; i < n; ++i) {
+    let x = i * 2 / n - 1;
+    curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
+  }
+  return curve;
+}
+
+function makeGateCurve(thresholdDB) {
+  const curve = new Float32Array(65536);
+  const thrLin = Math.pow(10, thresholdDB / 20);
+  for (let i = 0; i < 65536; i++) {
+    const x = (i * 2) / 65536 - 1;
+    // Hard gate
+    curve[i] = Math.abs(x) < thrLin ? 0 : x;
+  }
+  return curve;
+}
+
+// ═══════════════════════ MIC / DSP ENGINE ═══════════════════════
+async function startMic() {
+  try {
+    const c = getAC();
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    micSource = c.createMediaStreamSource(micStream);
+
+    // 1. ISOLATOR (EQ)
+    micFilter = c.createBiquadFilter();
+    micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass';
+    micFilter.frequency.value = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
+    micFilter.Q.value = +document.getElementById('mic-bp-q').value;
+
+    micGainNode = c.createGain(); 
+    micAn = c.createAnalyser(); micAn.fftSize = 4096;
+
+    // 2. DOOM MODE
+    micDistortion = c.createWaveShaper();
+    micDistortion.curve = isDoomModeOn ? makeDistortionCurve(+document.getElementById('mic-drive').value) : makeDistortionCurve(0);
+
+    micLimiter = c.createDynamicsCompressor();
+    micLimiter.threshold.value = isDoomModeOn ? -3 : 0;
+    micLimiter.knee.value = 0; micLimiter.ratio.value = 20;
+    micLimiter.attack.value = 0.001; micLimiter.release.value = 0.1;
+
+    // 3. GATED DELAY SYSTEM
+    delayInputGain = c.createGain(); delayInputGain.gain.value = 1;
+    delayGate = c.createWaveShaper(); 
+    delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
+    
+    delayNode = c.createDelay(3.0); 
+    delayNode.delayTime.value = (+document.getElementById('dly-rate').value) / 1000;
+    
+    delayFeedback = c.createGain(); 
+    delayFeedback.gain.value = (+document.getElementById('dly-fb').value) / 100;
+    
+    delayDryGain = c.createGain(); delayWetGain = c.createGain();
+    const mix = +document.getElementById('dly-mix').value / 100;
+    delayDryGain.gain.value = isDelayOn ? 1 - mix : 1;
+    delayWetGain.gain.value = isDelayOn ? mix : 0;
+
+    // 4. MONITOR & RECORDER & SAFETY
+    micMonitorGain = c.createGain(); 
+    micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
+
+    recorderScriptNode = c.createScriptProcessor(4096, 1, 1);
+    recorderScriptNode.onaudioprocess = function(e) {
+      if(!isRecording) return;
+      const inputData = e.inputBuffer.getChannelData(0);
+      recordedChunks.push(new Float32Array(inputData));
+    };
+
+    micHardClipper = c.createWaveShaper();
+    micHardClipper.curve = new Float32Array([-1, 1]);
+
+    // WIRING
+    micSource.connect(micFilter);
+    micFilter.connect(micGainNode);
+    micGainNode.connect(micAn); // To visualizer
+
+    // Doom Path
+    micGainNode.connect(micDistortion);
+    micDistortion.connect(micLimiter);
+
+    // Delay Branching
+    micLimiter.connect(delayInputGain);
+    
+    // Dry path
+    delayInputGain.connect(delayDryGain);
+    delayDryGain.connect(micMonitorGain);
+
+    // Wet path
+    delayInputGain.connect(delayGate);
+    delayGate.connect(delayNode);
+    delayNode.connect(delayFeedback);
+    delayFeedback.connect(delayNode); // Feedback loop
+    delayNode.connect(delayWetGain);
+    delayWetGain.connect(micMonitorGain);
+
+    // Output Stage
+    micMonitorGain.connect(recorderScriptNode);
+    recorderScriptNode.connect(micHardClipper);
+    micHardClipper.connect(c.destination);
+
+    micActive = true;
+    const btn = document.getElementById('mic-btn');
+    btn.innerHTML = '🔴 PARAR MICROFONE'; btn.className = 'btn btn-r';
+    drawMicSpec();
+  } catch (e) { FB('Falha no acesso ao microfone', 'var(--red)'); }
+}
+
+function stopMic() {
+  if (micStream) micStream.getTracks().forEach(t => t.stop());
+  if (isRecording) toggleRecord(); // Força parada de gravação se mic desligar
+  micStream = null; micSource = null; micAn = null; micActive = false;
+  const btn = document.getElementById('mic-btn');
+  btn.innerHTML = '🎙 LIGAR MICROFONE'; btn.className = 'btn btn-c';
+  document.getElementById('mic-freq').textContent = '—';
+  document.getElementById('mic-db').textContent = '— dBFS';
+  document.getElementById('mic-vu').style.width = '0%';
+}
+function toggleMic() { if (micActive) stopMic(); else startMic(); }
+
+// UI CONTROLS
+function toggleMicFilter() {
+  isMicFilterOn = !isMicFilterOn;
+  const btn = document.getElementById('bp-toggle'); btn.textContent = isMicFilterOn ? 'ON' : 'OFF'; btn.className = isMicFilterOn ? 'chip chip-xs on' : 'chip chip-xs';
+  document.getElementById('mic-bp-f').disabled = !isMicFilterOn; document.getElementById('mic-bp-q').disabled = !isMicFilterOn;
+  if (micFilter) micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass';
+}
+function updateMicFilter() {
+  const f = fLog(+document.getElementById('mic-bp-f').value, 20, 20000), q = +document.getElementById('mic-bp-q').value;
+  document.getElementById('bp-f-val').textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'kHz' : Math.round(f) + 'Hz'; document.getElementById('bp-q-val').textContent = 'Q: ' + q;
+  if (micFilter) { micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); micFilter.Q.setTargetAtTime(q, AC.currentTime, 0.05); }
+}
+
+function toggleDelay() {
+  isDelayOn = !isDelayOn;
+  const btn = document.getElementById('dly-toggle'); btn.textContent = isDelayOn ? 'ON' : 'OFF'; btn.className = isDelayOn ? 'chip chip-xs on' : 'chip chip-xs';
+  ['dly-rate','dly-fb','dly-mix','dly-thr'].forEach(id => document.getElementById(id).disabled = !isDelayOn);
+  updateDelay();
+}
+function updateDelay() {
+  const rate = +document.getElementById('dly-rate').value, fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value, thr = +document.getElementById('dly-thr').value;
+  document.getElementById('dly-rate-v').textContent = rate + 'ms'; document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; document.getElementById('dly-thr-v').textContent = thr + 'dB';
+  
+  if (AC && delayNode) {
+    delayNode.delayTime.setTargetAtTime(rate / 1000, AC.currentTime, 0.05);
+    delayFeedback.gain.setTargetAtTime(fb / 100, AC.currentTime, 0.05);
+    delayDryGain.gain.setTargetAtTime(isDelayOn ? 1 - (mix/100) : 1, AC.currentTime, 0.05);
+    delayWetGain.gain.setTargetAtTime(isDelayOn ? mix/100 : 0, AC.currentTime, 0.05);
+    if(delayGate) delayGate.curve = isDelayOn ? makeGateCurve(thr) : makeGateCurve(-60);
+  }
+}
+
+function toggleDoomMode() {
+  isDoomModeOn = !isDoomModeOn;
+  const btn = document.getElementById('doom-toggle'); btn.textContent = isDoomModeOn ? 'ON' : 'OFF'; btn.className = isDoomModeOn ? 'chip chip-xs on-r' : 'chip chip-xs';
+  document.getElementById('mic-drive').disabled = !isDoomModeOn;
+  if (micLimiter) micLimiter.threshold.setTargetAtTime(isDoomModeOn ? -3 : 0, AC.currentTime, 0.05);
+  updateDoomMode();
+  if (isDoomModeOn) FB('DOOM Mode Ativado 🔥', 'var(--red)');
+}
+function updateDoomMode() {
+  const drive = +document.getElementById('mic-drive').value;
+  document.getElementById('drive-val').textContent = drive + '% Drive';
+  if (micDistortion) micDistortion.curve = isDoomModeOn ? makeDistortionCurve(drive) : makeDistortionCurve(0);
+}
+
+function toggleMicMonitor() {
+  isMicMonitorOn = !isMicMonitorOn;
+  const btn = document.getElementById('mon-btn'); btn.textContent = isMicMonitorOn ? 'ON' : 'OFF'; btn.className = isMicMonitorOn ? 'chip on-r' : 'chip';
+  if (micMonitorGain) micMonitorGain.gain.setTargetAtTime(isMicMonitorOn ? 1 : 0, AC.currentTime, 0.05);
+  if (isMicMonitorOn) FB('Fones Ativados. Cuidado com o volume.', 'var(--cyan)');
+}
+
+// ═══════════════════════ RTA VISUALIZER ═══════════════════════
+const cvs = document.getElementById('mic-spec'), ctx = cvs.getContext('2d');
+function resCvs() { if (cvs.offsetWidth > 0) { cvs.width = cvs.offsetWidth * devicePixelRatio; cvs.height = cvs.offsetHeight * devicePixelRatio; } }
+window.addEventListener('resize', resCvs); setTimeout(resCvs, 100);
+
+function getZoneColor(f) {
+  if (f < 250) return [79, 195, 247];       // Blue
+  if (f < 500) return [0, 229, 255];        // Cyan
+  if (f < 2000) return [0, 255, 136];       // Green
+  if (f < 5000) return [245, 166, 35];      // Amber
+  return [179, 136, 255];                   // Violet
+}
+
+function drawMicSpec() {
+  if (!micActive) return; requestAnimationFrame(drawMicSpec); if (!micAn || !AC) return;
+  const data = new Uint8Array(micAn.frequencyBinCount); micAn.getByteFrequencyData(data);
+  const rms = data.reduce((s, v) => s + (v / 255) ** 2, 0) / data.length;
+  const db = Math.max(-80, 20 * Math.log10(Math.sqrt(rms) + 1e-9));
+  
+  document.getElementById('mic-db').textContent = db.toFixed(1) + ' dBFS';
+  document.getElementById('mic-vu').style.width = Math.max(0, Math.min(100, (db + 80) / 80 * 100)) + '%';
+
+  let pIdx = 0, pVal = 0;
+  for (let i = 2; i < data.length; i++) { if (data[i] > pVal && data[i] > 80) { pVal = data[i]; pIdx = i; } }
+  const pFreq = Math.round(pIdx * AC.sampleRate / micAn.fftSize);
+
+  if (pVal > 80) {
+    document.getElementById('mic-freq').textContent = pFreq >= 1000 ? (pFreq / 1000).toFixed(2) + 'k' : pFreq;
+    document.getElementById('mic-note').textContent = noteStr(pFreq);
+    document.getElementById('peak-alert').classList.toggle('show', pVal > 240 && rms > 0.1);
+  } else {
+    document.getElementById('mic-freq').textContent = '—';
+    document.getElementById('mic-note').textContent = 'Silêncio';
+    document.getElementById('peak-alert').classList.remove('show');
+  }
+
+  const W = cvs.offsetWidth, H = cvs.offsetHeight, sc = devicePixelRatio; if (W === 0) return;
+  cvs.width = W * sc; cvs.height = H * sc; ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+  for (let px = 0; px < W; px++) {
+    const f = Math.pow(10, Math.log10(20) + (px / W) * (Math.log10(20000) - Math.log10(20)));
+    const val = data[Math.round(f / AC.sampleRate * micAn.fftSize)] || 0;
+    const c = getZoneColor(f);
+    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${0.2 + val / 255 * 0.8})`;
+    ctx.fillRect(px * sc, (H - (val / 255) * H) * sc, sc, (val / 255) * H * sc);
+  }
+}
+
+// ═══════════════════════ WAV RECORDER (24-bit PCM) ═══════════════════════
+function toggleRecord() {
+  if(!micActive) { FB('Ligue o microfone primeiro', 'var(--red)'); return; }
+  
+  isRecording = !isRecording;
+  const btn = document.getElementById('rec-btn');
+  const dot = document.getElementById('rec-dot');
+  
+  if (isRecording) {
+    recordedChunks = [];
+    recordingStartTime = AC.currentTime;
+    btn.style.borderColor = 'var(--green)'; btn.style.color = 'var(--green)';
+    dot.style.background = 'var(--green)';
+    btn.innerHTML = `<span class="dot on" style="background:var(--green)"></span> GRAVANDO... (CLIQUE P/ PARAR)`;
+    FB('Gravação iniciada', 'var(--green)');
+  } else {
+    btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
+    dot.style.background = 'var(--red)';
+    btn.innerHTML = `<span class="dot" style="background:var(--red)"></span> INICIAR GRAVAÇÃO`;
+    
+    if (recordedChunks.length > 0) {
+      processWAV();
+    }
+  }
+}
+
+function processWAV() {
+  FB('Processando WAV 24-bit...', 'var(--cyan)');
+  setTimeout(() => {
+    let totalLen = 0;
+    recordedChunks.forEach(c => totalLen += c.length);
+    
+    // Create WAV Buffer
+    const buffer = new ArrayBuffer(44 + totalLen * 3);
+    const view = new DataView(buffer);
+    
+    const writeString = (off, str) => { for(let i=0; i<str.length; i++) view.setUint8(off+i, str.charCodeAt(i)); };
+    
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + totalLen * 3, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true); // PCM
+    view.setUint16(22, 1, true); // Mono
+    view.setUint32(24, 48000, true); // 48kHz
+    view.setUint32(28, 48000 * 3, true); // ByteRate
+    view.setUint16(32, 3, true); // BlockAlign
+    view.setUint16(34, 24, true); // 24-bit
+    writeString(36, 'data');
+    view.setUint32(40, totalLen * 3, true);
+
+    let offset = 44;
+    for (let i = 0; i < recordedChunks.length; i++) {
+      const chunk = recordedChunks[i];
+      for (let j = 0; j < chunk.length; j++) {
+        let s = Math.max(-1, Math.min(1, chunk[j]));
+        s = s < 0 ? s * 0x800000 : s * 0x7FFFFF; // to 24-bit int
+        view.setInt8(offset, s & 0xFF);
+        view.setInt8(offset + 1, (s >> 8) & 0xFF);
+        view.setInt8(offset + 2, (s >> 16) & 0xFF);
+        offset += 3;
+      }
+    }
+    
+    const blob = new Blob([view], { type: 'audio/wav' });
+    addFileToList(blob, totalLen);
+  }, 100);
+}
+
+function addFileToList(blob, samples) {
+  const url = URL.createObjectURL(blob);
+  const dur = (samples / 48000).toFixed(1);
+  const mb = (blob.size / 1024 / 1024).toFixed(2);
+  const now = new Date();
+  const name = `HyperFocus_${now.getHours()}h${now.getMinutes()}m${now.getSeconds()}s.wav`;
+  
+  const list = document.getElementById('file-list');
+  const item = document.createElement('div');
+  item.className = 'rec-item';
+  item.innerHTML = `
+    <div class="rec-info">
+      <div class="rec-name">${name}</div>
+      <div class="rec-meta">${dur}s • ${mb} MB • 24-bit 48kHz</div>
+    </div>
+    <a href="${url}" download="${name}" class="btn btn-c btn-sm" style="text-decoration:none">BAIXAR</a>
+  `;
+  list.prepend(item);
+  FB('Arquivo pronto para baixar!', 'var(--green)');
+}
+</script>
+</body>
+</html>
