@@ -20,7 +20,7 @@
   --r:12px;
 }
 html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:100%;overflow-x:hidden;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
-#app{display:flex;flex-direction:column;min-height:100dvh;max-width:520px;margin:0 auto;-webkit-user-select:none;user-select:none;padding-bottom:120px}
+#app{display:flex;flex-direction:column;min-height:100dvh;max-width:520px;margin:0 auto;-webkit-user-select:none;user-select:none;padding-bottom:100px}
 
 #hdr{position:sticky;top:0;z-index:100;background:rgba(10,18,32,0.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:14px 16px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between}
@@ -107,13 +107,6 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
     <div class="vu-wrap"><div class="vu-bar" id="mic-vu"></div></div>
     
     <canvas id="mic-spec" class="cvs-box" height="130" style="margin-top:14px"></canvas>
-    <div class="leg-wrap">
-      <div class="leg-item"><div class="leg-c" style="background:var(--blue)"></div><div class="leg-t">SUB</div></div>
-      <div class="leg-item"><div class="leg-c" style="background:var(--cyan)"></div><div class="leg-t">LO-MID</div></div>
-      <div class="leg-item"><div class="leg-c" style="background:var(--green)"></div><div class="leg-t">MID</div></div>
-      <div class="leg-item"><div class="leg-c" style="background:var(--amber)"></div><div class="leg-t">HI-MID</div></div>
-      <div class="leg-item"><div class="leg-c" style="background:var(--violet)"></div><div class="leg-t">HIGH</div></div>
-    </div>
     
     <button class="btn btn-c" id="mic-btn" onclick="toggleMic()" style="margin-top:16px">🎙 LIGAR MICROFONE</button>
   </div>
@@ -121,9 +114,6 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
   <div class="card">
     <div class="clabel">DSP & Roteamento Dinâmico</div>
     
-    <div class="warn-box">
-      <b style="color:var(--cyan)">Monitor Principal:</b> Libera o som p/ fones.
-    </div>
     <div class="row" style="justify-content:space-between; margin-bottom:12px; background:var(--panel2); padding:10px; border-radius:8px; border:1px solid var(--border2)">
       <div class="clabel2" style="margin:0; color:var(--text); font-size:10px; font-weight:700">🔊 ATIVAR SAÍDA DE SOM</div>
       <button class="chip" id="mon-btn" onclick="toggleMicMonitor()" style="width:60px">OFF</button>
@@ -210,8 +200,6 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 
   <div class="card">
     <div class="clabel" style="color:var(--blue)">KINETIC LAB (Hardware Tracking)</div>
-    <div style="font-size:9px; color:var(--muted); margin-bottom:12px; line-height:1.4">Converte a inclinação do aparelho em varreduras na microfonia. Os controles manuais funcionam normalmente se os botões cinéticos estiverem OFF.</div>
-    
     <button class="btn btn-x" id="sensor-auth-btn" onclick="requestDeviceMotion()" style="margin-bottom:12px; border-color:var(--blue); color:var(--blue)">
       🔓 AUTORIZAR SENSORES FÍSICOS
     </button>
@@ -219,18 +207,21 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
     <div class="g2" style="margin-bottom:12px">
       <div class="sensor-box">
         <div class="row" style="justify-content:space-between; margin-bottom:4px">
-          <div class="sensor-lbl">Delay Modulator</div>
-          <button class="chip chip-xs" id="kin-y-toggle" onclick="toggleKineticY()" style="width:40px; padding:4px">OFF</button>
+          <div class="sensor-lbl" style="font-size:8px">Delay Modulator</div>
+          <button class="chip chip-xs" id="kin-delay-toggle" onclick="toggleKineticDelay()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div><div class="sensor-lbl" style="color:var(--violet)">Eixo Y (Rate & FB Delay)</div><div class="sensor-val" id="sens-y">0°</div></div>
+        <div style="display:flex; justify-content:space-between">
+          <div><div class="sensor-lbl" style="color:var(--violet)">Eixo Y (Rate)</div><div class="sensor-val" id="sens-y">0°</div></div>
+          <div style="text-align:right"><div class="sensor-lbl" style="color:var(--amber)">Eixo X (FB)</div><div class="sensor-val" style="color:var(--amber)" id="sens-x">0°</div></div>
+        </div>
       </div>
 
       <div class="sensor-box">
         <div class="row" style="justify-content:space-between; margin-bottom:4px">
-          <div class="sensor-lbl">Filtro Sweeper</div>
-          <button class="chip chip-xs" id="kin-x-toggle" onclick="toggleKineticX()" style="width:40px; padding:4px">OFF</button>
+          <div class="sensor-lbl" style="font-size:8px">Filtro Sweeper</div>
+          <button class="chip chip-xs" id="kin-filter-toggle" onclick="toggleKineticFilter()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div><div class="sensor-lbl" style="color:var(--cyan)">Eixo X (Frequência BPF)</div><div class="sensor-val" style="color:var(--cyan)" id="sens-x">0°</div></div>
+        <div><div class="sensor-lbl" style="color:var(--cyan)">Bússola/Eixo Z (Freq)</div><div class="sensor-val" style="color:var(--cyan)" id="sens-z">0°</div></div>
       </div>
     </div>
   </div>
@@ -238,7 +229,7 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
   <div class="card">
     <div class="clabel" style="color:var(--violet)">SONAR LINK (Acoustic Tracking)</div>
     <div style="font-size:9px; color:var(--muted); margin-bottom:12px; line-height:1.4">
-      Conecta dois celulares pelo ar. O <b>Celular A</b> emite 19kHz inaudível. O <b>Celular B</b> (Receptor) mede a intensidade ultrassônica e mapeia a distância para automatizar o <i>Doom Drive</i>.
+      O <b>Celular A</b> emite 19kHz inaudível. O <b>Celular B</b> lê a energia via FFT no microfone e injeta a 19kHz paralelamente na cadeia principal, automatizando o Drive.
     </div>
     
     <div class="g2">
@@ -247,15 +238,15 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
           <div class="sensor-lbl">Emissor (19kHz)</div>
           <button class="chip chip-xs" id="sonar-emit-btn" onclick="toggleSonarEmitter()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div class="sensor-lbl">Emite onda contínua</div>
+        <div class="sensor-lbl">Emite direto na Saída</div>
       </div>
 
       <div class="sensor-box" style="border-color:var(--red)">
         <div class="row" style="justify-content:space-between; margin-bottom:4px">
-          <div class="sensor-lbl">Receptor (Drive Mod)</div>
+          <div class="sensor-lbl">Receptor Paralelo</div>
           <button class="chip chip-xs" id="sonar-recv-btn" onclick="toggleSonarReceiver()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div><div class="sensor-lbl">Sinal Captado -> Drive</div><div class="sensor-val" style="color:var(--red)" id="sonar-val">OFF</div></div>
+        <div><div class="sensor-lbl">Modulação de Drive</div><div class="sensor-val" style="color:var(--red)" id="sonar-val">OFF</div></div>
       </div>
     </div>
   </div>
@@ -273,9 +264,10 @@ let AC = null, masterAn = null;
 let micStream = null, micSource = null, micAn = null, micActive = false;
 
 // Audio Nodes
-let micFilter = null, micGainNode = null, micMonitorGain = null;
-let chaosNode = null; // A foice anti-estagnação
-let slicerGain = null;
+let micFilter = null;
+let sonarPassFilter = null, sonarPassGain = null, sonarAn = null; // Caminho paralelo do Sonar 19kHz
+let chaosNode = null; 
+let slicerGain = null, micGainNode = null, micMonitorGain = null;
 let doomDryGain = null, doomWetGain = null, micDistortion = null, micLimiter = null;
 let delayNode = null, delayFeedback = null, delayGate = null, delayDryGain = null, delayWetGain = null, delayInputGain = null;
 let micHardClipper = null;
@@ -288,7 +280,7 @@ let slicerBPM = 120, slicerDiv = 1, slicerDsrPct = 0.5;
 let nextSlicerTime = 0, slicerTimerId = null;
 
 // Kinetic Sensors
-let isKineticYOn = false, isKineticXOn = false, sensorsAuthorized = false;
+let isKineticDelayOn = false, isKineticFilterOn = false, sensorsAuthorized = false;
 
 // Sonar System
 let sonarOsc = null, sonarGain = null, isSonarEmitting = false, isSonarReceiving = false;
@@ -359,10 +351,10 @@ function updateKnobVis() {
   let deg = -135 + (pct * 270);
   dialEl.style.transform = `rotate(${deg}deg)`;
   document.getElementById('dly-rate-v').textContent = Math.round(knobRateVal) + 'ms';
-  if (isDelayOn && delayNode && AC) { delayNode.delayTime.setTargetAtTime(knobRateVal / 1000, AC.currentTime, 0.05); }
+  if (isDelayOn && delayNode && AC && !isKineticDelayOn) { delayNode.delayTime.setTargetAtTime(knobRateVal / 1000, AC.currentTime, 0.05); }
 }
-knobEl.addEventListener('pointerdown', (e) => { if (!isDelayOn) return; e.preventDefault(); isKnobDragging = true; knobStartY = e.clientY; knobStartVal = knobRateVal; knobEl.setPointerCapture(e.pointerId); });
-knobEl.addEventListener('pointermove', (e) => { if (!isKnobDragging || isKineticYOn) return; e.preventDefault(); let dy = knobStartY - e.clientY; let deltaVal = dy * 4; knobRateVal = Math.max(10, Math.min(1000, knobStartVal + deltaVal)); updateKnobVis(); });
+knobEl.addEventListener('pointerdown', (e) => { if (!isDelayOn || isKineticDelayOn) return; e.preventDefault(); isKnobDragging = true; knobStartY = e.clientY; knobStartVal = knobRateVal; knobEl.setPointerCapture(e.pointerId); });
+knobEl.addEventListener('pointermove', (e) => { if (!isKnobDragging || isKineticDelayOn) return; e.preventDefault(); let dy = knobStartY - e.clientY; let deltaVal = dy * 4; knobRateVal = Math.max(10, Math.min(1000, knobStartVal + deltaVal)); updateKnobVis(); });
 ['pointerup', 'pointercancel'].forEach(ev => { knobEl.addEventListener(ev, (e) => { isKnobDragging = false; knobEl.releasePointerCapture(e.pointerId); }); });
 updateKnobVis();
 
@@ -381,47 +373,46 @@ function requestDeviceMotion() {
   }
 }
 
-function toggleKineticY() {
+function toggleKineticDelay() {
   if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
-  isKineticYOn = !isKineticYOn;
-  const btn = document.getElementById('kin-y-toggle'); btn.textContent = isKineticYOn ? 'ON' : 'OFF'; btn.className = isKineticYOn ? 'chip chip-xs on-v' : 'chip chip-xs';
-  if(!isDelayOn && isKineticYOn) toggleDelay();
+  isKineticDelayOn = !isKineticDelayOn;
+  const btn = document.getElementById('kin-delay-toggle'); btn.textContent = isKineticDelayOn ? 'ON' : 'OFF'; btn.className = isKineticDelayOn ? 'chip chip-xs on-v' : 'chip chip-xs';
+  if(!isDelayOn && isKineticDelayOn) toggleDelay();
 }
-function toggleKineticX() {
+
+function toggleKineticFilter() {
   if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
-  isKineticXOn = !isKineticXOn;
-  const btn = document.getElementById('kin-x-toggle'); btn.textContent = isKineticXOn ? 'ON' : 'OFF'; btn.className = isKineticXOn ? 'chip chip-xs on' : 'chip chip-xs';
-  if(!isMicFilterOn && isKineticXOn) toggleMicFilter();
+  isKineticFilterOn = !isKineticFilterOn;
+  const btn = document.getElementById('kin-filter-toggle'); btn.textContent = isKineticFilterOn ? 'ON' : 'OFF'; btn.className = isKineticFilterOn ? 'chip chip-xs on' : 'chip chip-xs';
+  if(!isMicFilterOn && isKineticFilterOn) toggleMicFilter();
 }
 
 function handleOrientation(e) {
   if(e.beta !== null) document.getElementById('sens-y').textContent = Math.round(e.beta) + '°';
   if(e.gamma !== null) document.getElementById('sens-x').textContent = Math.round(e.gamma) + '°';
+  if(e.alpha !== null) document.getElementById('sens-z').textContent = Math.round(e.alpha) + '°';
 
-  // Y-axis = Delay Rate & Feedback
-  if (isKineticYOn && delayNode && AC) {
+  if (isKineticDelayOn && delayNode && AC) {
     let beta = Math.max(-90, Math.min(90, e.beta || 0));
+    let gamma = Math.max(-90, Math.min(90, e.gamma || 0));
     
-    // Mapeia -90 a 90 para Rate 10ms a 1000ms
     knobRateVal = mapRange(beta, -90, 90, 10, 1000);
-    updateKnobVis(); // Atualiza o knob visualmente e seta o delayNode
+    updateKnobVis();
     
-    // Mapeia -90 a 90 para Feedback 0% a 95%
-    let newFb = mapRange(beta, -90, 90, 0, 95);
+    let newFb = mapRange(gamma, -90, 90, 0, 95);
     document.getElementById('dly-fb').value = newFb;
-    updateDelay(); // Atualiza o FB node
+    delayFeedback.gain.setTargetAtTime(newFb / 100, AC.currentTime, 0.05);
+    document.getElementById('dly-fb-v').textContent = Math.round(newFb) + '%';
   }
 
-  // X-axis = Bandpass Filter Freq
-  if (isKineticXOn && micFilter && AC) {
-    let gamma = Math.max(-90, Math.min(90, e.gamma || 0));
-    let f = mapRange(gamma, -90, 90, 200, 8000);
+  if (isKineticFilterOn && micFilter && AC) {
+    let alpha = e.alpha || 0;
+    let f = fLog(mapRange(alpha, 0, 360, 0, 100), 20, 20000); 
     micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.1);
     
-    // UI Update Manual Slider
     const pct = (Math.log10(f) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20)) * 100;
     document.getElementById('mic-bp-f').value = pct;
-    document.getElementById('bp-f-val').textContent = Math.round(f) + 'Hz';
+    document.getElementById('bp-f-val').textContent = f >= 1000 ? (f/1000).toFixed(1)+'kHz' : Math.round(f) + 'Hz';
   }
 }
 
@@ -478,9 +469,11 @@ function toggleSonarEmitter() {
     sonarOsc.frequency.value = 19000;
     sonarGain.gain.value = 1.0;
     sonarOsc.connect(sonarGain);
+    
+    // O Emitter vai direto para a saída física, ignorando toda a cadeia de DSP!
     sonarGain.connect(AC.destination); 
     sonarOsc.start();
-    FB('Emissor Ultrassônico Ativo', 'var(--blue)');
+    FB('Emissor Ultrassônico Ativo (Pós-FX)', 'var(--blue)');
   } else {
     if(sonarOsc) { sonarOsc.stop(); sonarOsc.disconnect(); sonarGain.disconnect(); sonarOsc = null; }
     FB('Emissor Desligado', 'var(--muted)');
@@ -496,10 +489,15 @@ function toggleSonarReceiver() {
   
   if(isSonarReceiving) {
      if(!micActive) startMic();
-     if(!isDoomModeOn) toggleDoomMode(); // Necessário p/ modular
-     FB('Receptor Ativo: Mapeando Distância', 'var(--red)');
+     if(!isDoomModeOn) toggleDoomMode(); 
+     FB('Receptor Paralelo Ativo', 'var(--red)');
   } else {
      document.getElementById('sonar-val').textContent = 'OFF';
+  }
+  
+  // Abre ou fecha o registro de bypass 19kHz do Sonar
+  if (sonarPassGain && AC) {
+    sonarPassGain.gain.setTargetAtTime(isSonarReceiving ? 1 : 0, AC.currentTime, 0.05);
   }
 }
 
@@ -511,23 +509,31 @@ async function startMic() {
     const iosAudioHack = new Audio(); iosAudioHack.autoplay = true; iosAudioHack.playsInline = true; iosAudioHack.muted = true; iosAudioHack.srcObject = micStream;
     micSource = c.createMediaStreamSource(micStream);
 
-    // Filter
+    // Main Filter
     micFilter = c.createBiquadFilter(); 
     micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass'; 
     micFilter.frequency.value = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
     micFilter.Q.value = +document.getElementById('mic-bp-q').value;
 
-    // A Foice (Chaos Node / Anti-Stag)
-    chaosNode = c.createBiquadFilter();
-    chaosNode.type = 'allpass'; // Transparente por padrão
+    // Parallel Sonar Filter (Permite 19kHz passar incólume pelo sistema)
+    sonarPassFilter = c.createBiquadFilter();
+    sonarPassFilter.type = 'bandpass';
+    sonarPassFilter.frequency.value = 19000;
+    sonarPassFilter.Q.value = 40;
+    sonarPassGain = c.createGain();
+    sonarPassGain.gain.value = isSonarReceiving ? 1 : 0;
     
-    // Slicer
-    slicerGain = c.createGain(); slicerGain.gain.value = 1;
+    // Dedicated Analyser for clean Sonar tracking (pre-slicer/doom)
+    sonarAn = c.createAnalyser();
+    sonarAn.fftSize = 2048;
 
+    chaosNode = c.createBiquadFilter();
+    chaosNode.type = 'allpass'; 
+    
+    slicerGain = c.createGain(); slicerGain.gain.value = 1;
     micGainNode = c.createGain(); 
     micAn = c.createAnalyser(); micAn.fftSize = 4096; micAn.smoothingTimeConstant = 0.92; 
 
-    // Doom Mode Split
     const initDoomMix = +document.getElementById('doom-mix').value / 100;
     doomDryGain = c.createGain(); doomDryGain.gain.value = isDoomModeOn ? 1 - initDoomMix : 1; 
     doomWetGain = c.createGain(); doomWetGain.gain.value = isDoomModeOn ? initDoomMix : 0;
@@ -535,9 +541,8 @@ async function startMic() {
     micDistortion = c.createWaveShaper(); micDistortion.curve = makeDistortionCurve(+document.getElementById('mic-drive').value);
     micLimiter = c.createDynamicsCompressor(); micLimiter.threshold.value = -3; micLimiter.knee.value = 0; micLimiter.ratio.value = 20; micLimiter.attack.value = 0.001; micLimiter.release.value = 0.1;
 
-    // Delay Bus
     delayInputGain = c.createGain(); 
-    delayGate = c.createWaveShaper(); delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
+    delayGate = c.createWaveShaper(); delayGate.curve = isDelayOn ? makeGateCurve(-60) : makeGateCurve(-60);
     delayNode = c.createDelay(3.0); delayNode.delayTime.value = knobRateVal / 1000;
     delayFeedback = c.createGain(); delayFeedback.gain.value = (+document.getElementById('dly-fb').value) / 100;
     delayDryGain = c.createGain(); delayWetGain = c.createGain();
@@ -545,26 +550,31 @@ async function startMic() {
     delayDryGain.gain.value = isDelayOn ? 1 - delayMix : 1; 
     delayWetGain.gain.value = isDelayOn ? delayMix : 0;
 
-    // Output
     micMonitorGain = c.createGain(); micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
     micHardClipper = c.createWaveShaper(); micHardClipper.curve = new Float32Array([-1, 1]);
 
-    // ROTEAMENTO FÍSICO COM A FOICE
+    // ROTEAMENTO FÍSICO CORRIGIDO (Com Sonar Bypass)
     micSource.connect(micFilter); 
-    micFilter.connect(chaosNode); // <--- A foice age logo após o isolador
+    micSource.connect(sonarPassFilter); // Sinal divide-se na raiz
+    
+    // O Sonar alimenta o detector e o Bypass
+    sonarPassFilter.connect(sonarAn);
+    sonarPassFilter.connect(sonarPassGain);
+    
+    // O Filtro Principal e o Sonar Bypass se encontram na Foice
+    micFilter.connect(chaosNode); 
+    sonarPassGain.connect(chaosNode); // 19kHz passa por fora do micFilter!
+    
     chaosNode.connect(slicerGain);
     slicerGain.connect(micGainNode);
     micGainNode.connect(micAn); 
     
-    // Doom Split
     micGainNode.connect(doomDryGain); doomDryGain.connect(delayInputGain); 
     micGainNode.connect(micDistortion); micDistortion.connect(micLimiter); micLimiter.connect(doomWetGain); doomWetGain.connect(delayInputGain); 
     
-    // Delay Split
     delayInputGain.connect(delayDryGain); 
     delayInputGain.connect(delayGate); delayGate.connect(delayNode); delayNode.connect(delayFeedback); delayFeedback.connect(delayNode); delayNode.connect(delayWetGain); 
 
-    // Mix Output
     delayDryGain.connect(micMonitorGain); delayWetGain.connect(micMonitorGain);
     micMonitorGain.connect(micHardClipper); micHardClipper.connect(c.destination);
 
@@ -592,7 +602,6 @@ function stagnationEngine(currentFreq) {
     stagnateFrames = 0;
   } else {
     stagnateFrames++;
-    // 6 segundos (approx 360 frames at 60fps)
     if (stagnateFrames > 360) {
       triggerChaosShift();
       stagnateFrames = 0; 
@@ -602,19 +611,16 @@ function stagnationEngine(currentFreq) {
 
 function triggerChaosShift() {
   if (!AC || !chaosNode) return;
-  // A Foice ataca a frequência estagnada criando um Notch brutal por 1.5s
   chaosNode.type = 'notch';
   chaosNode.frequency.setValueAtTime(stagnateFreq, AC.currentTime);
   chaosNode.Q.setValueAtTime(20, AC.currentTime);
-
   setTimeout(() => { if(chaosNode) chaosNode.type = 'allpass'; }, 1500);
-
   document.getElementById('mic-freq').style.color = 'var(--violet)';
   setTimeout(()=> document.getElementById('mic-freq').style.color = 'var(--cyan)', 800);
-  FB('KINETIC BREATH: Frequência fundamental morta na raiz!', 'var(--violet)');
+  FB('KINETIC BREATH: Frequência fundamental suprimida!', 'var(--violet)');
 }
 
-// UI CONTROLS REMAINDER
+// UI CONTROLS
 function toggleMicFilter() {
   isMicFilterOn = !isMicFilterOn;
   const btn = document.getElementById('bp-toggle'); btn.textContent = isMicFilterOn ? 'ON' : 'OFF'; btn.className = isMicFilterOn ? 'chip chip-xs on' : 'chip chip-xs';
@@ -627,8 +633,7 @@ function updateMicFilter() {
   const q = +document.getElementById('mic-bp-q').value;
   document.getElementById('bp-f-val').textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'kHz' : Math.round(f) + 'Hz'; 
   document.getElementById('bp-q-val').textContent = 'Q: ' + q; 
-  // Só atualiza se o Kinetic X não estiver matando a manualidade
-  if (micFilter && AC && !isKineticXOn) { 
+  if (micFilter && AC && !isKineticFilterOn) { 
     micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); 
     micFilter.Q.setTargetAtTime(q, AC.currentTime, 0.05); 
   }
@@ -640,13 +645,13 @@ function toggleDoomMode() {
   document.getElementById('mic-drive').disabled = !isDoomModeOn;
   document.getElementById('doom-mix').disabled = !isDoomModeOn;
   updateDoomMode();
-  if (isDoomModeOn) FB('DOOM MODE ON (Paralelo)', 'var(--red)');
+  if (isDoomModeOn) FB('DOOM MODE ON', 'var(--red)');
 }
 function updateDoomMode() {
   const drive = +document.getElementById('mic-drive').value;
   const mix = +document.getElementById('doom-mix').value;
   document.getElementById('drive-val').textContent = drive + '%'; document.getElementById('doom-mix-val').textContent = mix + '%';
-  if (micDistortion && !isSonarReceiving) micDistortion.curve = makeDistortionCurve(drive); // Sonar controla o drive se ligado
+  if (micDistortion && !isSonarReceiving) micDistortion.curve = makeDistortionCurve(drive); 
   if(AC && doomDryGain && doomActiveGain) {
     doomDryGain.gain.setTargetAtTime(isDoomModeOn ? 1 - (mix/100) : 1, AC.currentTime, 0.05);
     doomActiveGain.gain.setTargetAtTime(isDoomModeOn ? mix/100 : 0, AC.currentTime, 0.05);
@@ -656,18 +661,17 @@ function updateDoomMode() {
 function toggleDelay() {
   isDelayOn = !isDelayOn;
   const btn = document.getElementById('dly-toggle'); btn.textContent = isDelayOn ? 'ON' : 'OFF'; btn.className = isDelayOn ? 'chip chip-xs on' : 'chip chip-xs';
-  ['dly-fb','dly-mix','dly-thr'].forEach(id => document.getElementById(id).disabled = !isDelayOn);
+  ['dly-fb','dly-mix'].forEach(id => document.getElementById(id).disabled = !isDelayOn);
   if(isDelayOn) document.getElementById('dly-rate-knob').classList.remove('disabled'); else document.getElementById('dly-rate-knob').classList.add('disabled');
   updateDelay();
 }
 function updateDelay() {
-  const fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value, thr = +document.getElementById('dly-thr').value;
-  document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; document.getElementById('dly-thr-v').textContent = thr + 'dB';
-  if (AC && delayNode && !isKineticYOn) { // Kinetic controla manualidade se ligado
+  const fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value;
+  document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; 
+  if (AC && delayNode && !isKineticDelayOn) { 
     delayFeedback.gain.setTargetAtTime(fb / 100, AC.currentTime, 0.05);
     delayDryGain.gain.setTargetAtTime(isDelayOn ? 1 - (mix/100) : 1, AC.currentTime, 0.05);
     delayWetGain.gain.setTargetAtTime(isDelayOn ? mix/100 : 0, AC.currentTime, 0.05);
-    if(delayGate) delayGate.curve = isDelayOn ? makeGateCurve(thr) : makeGateCurve(-60);
   }
 }
 
@@ -691,27 +695,27 @@ function drawMicSpec() {
   
   const now = performance.now();
 
-  // Peak Hold UI
   if (db > lastPeakHold.val) { lastPeakHold.val = db; lastPeakHold.time = now; } 
   else if (now - lastPeakHold.time > 1500) { lastPeakHold.val -= 0.5; }
 
   document.getElementById('mic-db').textContent = lastPeakHold.val.toFixed(1) + ' dBFS';
   document.getElementById('mic-vu').style.width = Math.max(0, Math.min(100, (lastPeakHold.val + 80) / 80 * 100)) + '%';
 
-  // Sonar Logic (Leitura bin FFT)
-  if (isSonarReceiving) {
+  // Sonar Logic - Lendo do analisador Dedicado (Não sofre com Slicer)
+  if (isSonarReceiving && sonarAn) {
+    const sData = new Uint8Array(sonarAn.frequencyBinCount);
+    sonarAn.getByteFrequencyData(sData);
     const nyquist = AC.sampleRate / 2;
-    const sonarBin = Math.round((19000 / nyquist) * (micAn.fftSize / 2));
-    const sAmp = data[sonarBin] || 0;
+    const sonarBin = Math.round((19000 / nyquist) * (sonarAn.fftSize / 2));
+    const sAmp = sData[sonarBin] || 0;
     
-    if (sAmp > 15) { // Passou do ruído de fundo
-      let newDrive = mapRange(sAmp, 15, 150, 0, 100);
+    if (sAmp > 10) { 
+      let newDrive = mapRange(sAmp, 10, 120, 0, 100);
       newDrive = Math.max(0, Math.min(100, newDrive));
       
       document.getElementById('mic-drive').value = newDrive;
       document.getElementById('drive-val').textContent = Math.round(newDrive) + '%';
       if (micDistortion) micDistortion.curve = makeDistortionCurve(newDrive);
-      
       document.getElementById('sonar-val').textContent = Math.round(newDrive) + '% Drive';
     } else {
       document.getElementById('sonar-val').textContent = 'Sinal perdido';
@@ -721,12 +725,12 @@ function drawMicSpec() {
   let pIdx = 0, pVal = 0; for (let i = 2; i < data.length; i++) { if (data[i] > pVal && data[i] > 80) { pVal = data[i]; pIdx = i; } }
   const pFreq = Math.round(pIdx * AC.sampleRate / micAn.fftSize);
   
-  if (pVal > 80 && pFreq < 18000) { // Ignora o Sonar para cálculo de picos úteis
+  // Ignora o pico de 19kHz do Sonar para não poluir o RTA e o Anti-Stagnation
+  if (pVal > 80 && pFreq < 18000) { 
     lastPeakHold.freq = pFreq;
     document.getElementById('mic-freq').textContent = pFreq >= 1000 ? (pFreq / 1000).toFixed(2) + 'k' : pFreq;
     document.getElementById('mic-note').textContent = noteStr(pFreq);
     document.getElementById('peak-alert').classList.toggle('show', pVal > 240 && rms > 0.1);
-    
     stagnationEngine(pFreq);
   } else { 
     document.getElementById('peak-alert').classList.remove('show'); 
