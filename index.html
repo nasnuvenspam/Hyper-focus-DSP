@@ -37,12 +37,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:
 .ri::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan-glow);cursor:pointer;border:2px solid var(--surface)}
 .ri:disabled::-webkit-slider-thumb{background:var(--muted);box-shadow:none;border-color:var(--border)}
 .rlabs{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted)}
-.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;border-radius:8px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:all .15s;text-transform:uppercase}
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:14px;border-radius:8px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;transition:transform .1s;text-transform:uppercase}
 .btn:active{transform:scale(.97)}
 .btn-c{background:var(--cyan);color:#000} 
 .btn-r{background:var(--red);color:#fff} 
 .btn-x{background:var(--panel2);border:1px solid var(--border2);color:var(--text)} 
-.btn-sm{padding:8px 12px;font-size:9px;width:auto}
 
 .knob-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
 .knob{position:relative;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--panel2) 0%, var(--bg) 100%);border:2px solid var(--border2);cursor:pointer;touch-action:none;box-shadow:inset 0 2px 4px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3)}
@@ -51,6 +50,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:
 .knob-indicator{position:absolute;width:4px;height:12px;background:var(--cyan);border-radius:2px;top:2px;left:50%;transform:translateX(-50%);box-shadow:0 0 6px var(--cyan)}
 
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3, 1fr);gap:6px}
 .row{display:flex;gap:10px;align-items:center}
 .chip{padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--muted2);font-family:var(--mono);font-size:9px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s}
 .chip.on{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow)}
@@ -63,7 +63,6 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--sans);height:
 .ind{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0}
 .dot.on{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
-.dot.warn{background:var(--amber);box-shadow:0 0 6px var(--amber)}
 
 .leg-wrap{display:flex;justify-content:space-between;margin-top:8px;padding:0 4px}
 .leg-item{display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -103,7 +102,7 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
   <div class="card">
     <div class="clabel" style="margin-bottom:4px">Entrada & RTA</div>
     <div style="text-align:center;padding:10px 0">
-      <div style="font-family:var(--mono);font-size:46px;font-weight:700;color:var(--cyan);letter-spacing:-2px;line-height:1" id="mic-freq">—</div>
+      <div style="font-family:var(--mono);font-size:46px;font-weight:700;color:var(--cyan);letter-spacing:-2px;line-height:1;transition:color 0.2s" id="mic-freq">—</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px" id="mic-note">Aguardando Mic</div>
       <div style="margin-top:6px"><span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="mic-db">— dBFS</span></div>
     </div>
@@ -144,9 +143,32 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
     </div>
 
     <hr class="d">
+    
+    <div class="row" style="justify-content:space-between">
+      <div class="clabel2" style="margin:0; color:var(--green)">2. Rhythmic Slicer (Beats)</div>
+      <button class="chip chip-xs" id="slicer-toggle" onclick="toggleSlicer()" style="width:50px">OFF</button>
+    </div>
+    <div class="info" style="font-size:9px; margin:6px 0 10px">Corta a microfonia em frações exatas do BPM, criando *gating* rítmico.</div>
+    <div class="g2">
+      <div>
+        <div class="clabel2" style="display:flex;justify-content:space-between"><span>BPM</span><span id="slicer-bpm-v" style="color:var(--muted)">120</span></div>
+        <input type="range" class="ri" id="slicer-bpm" min="60" max="200" step="1" value="120" oninput="updateSlicer()" disabled style="margin:0">
+      </div>
+      <div>
+        <div class="clabel2" style="display:flex;justify-content:space-between"><span>DSR Janela</span><span id="slicer-dsr-v" style="color:var(--muted)">50%</span></div>
+        <input type="range" class="ri" id="slicer-dsr" min="10" max="90" step="1" value="50" oninput="updateSlicer()" disabled style="margin:0">
+      </div>
+    </div>
+    <div class="g3" style="margin-top:8px">
+      <button class="chip chip-xs on" id="sl-1-4" onclick="setSlicerDiv(1, 'sl-1-4')">1/4</button>
+      <button class="chip chip-xs" id="sl-1-8" onclick="setSlicerDiv(0.5, 'sl-1-8')">1/8</button>
+      <button class="chip chip-xs" id="sl-1-16" onclick="setSlicerDiv(0.25, 'sl-1-16')">1/16</button>
+    </div>
+
+    <hr class="d">
 
     <div class="row" style="justify-content:space-between">
-      <div class="clabel2" style="margin:0; color:var(--red)">2. Doom Mode (Parallel Drive)</div>
+      <div class="clabel2" style="margin:0; color:var(--red)">3. Doom Mode (Parallel Drive)</div>
       <button class="chip chip-xs" id="doom-toggle" onclick="toggleDoomMode()" style="width:50px">OFF</button>
     </div>
     <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px">
@@ -163,7 +185,7 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
     <hr class="d">
 
     <div class="row" style="justify-content:space-between">
-      <div class="clabel2" style="margin:0; color:var(--violet)">3. Gated Delay (Master)</div>
+      <div class="clabel2" style="margin:0; color:var(--violet)">4. Gated Delay (Master)</div>
       <button class="chip chip-xs" id="dly-toggle" onclick="toggleDelay()" style="width:50px">OFF</button>
     </div>
     <div style="display:flex;gap:12px;margin-top:10px;align-items:flex-end">
@@ -181,46 +203,34 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
           <div class="clabel2" style="display:flex;justify-content:space-between"><span>Dry / Wet</span><span id="dly-mix-v" style="color:var(--muted)">50%</span></div>
           <input type="range" class="ri" id="dly-mix" min="0" max="100" step="1" value="50" oninput="updateDelay()" disabled style="margin:0">
         </div>
-        <div>
-          <div class="clabel2" style="display:flex;justify-content:space-between"><span>Gate Threshold</span><span id="dly-thr-v" style="color:var(--muted)">-30dB</span></div>
-          <input type="range" class="ri" id="dly-thr" min="-60" max="0" step="1" value="-30" oninput="updateDelay()" disabled style="margin:0">
-        </div>
       </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="clabel" style="color:var(--blue)">KINETIC LAB (Theremin & Chorus)</div>
-    <div style="font-size:9px; color:var(--muted); margin-bottom:12px; line-height:1.4">Converte a inclinação (Pitch/Vol) e a Bússola (Spatial Chorus) em modulação. <b>Obriga a interação das ondas com a microfonia no Doom Mode gerando IMD orgânico.</b></div>
+    <div class="clabel" style="color:var(--blue)">KINETIC LAB (Shift & Slicer)</div>
+    <div style="font-size:9px; color:var(--muted); margin-bottom:12px; line-height:1.4">Converte a inclinação do aparelho em varreduras na microfonia. O motor <b>Chaos/Breath</b> age sozinho: se a microfonia estagnar por 6s, ele rasga o harmônico para a sala respirar.</div>
     
     <button class="btn btn-x" id="sensor-auth-btn" onclick="requestDeviceMotion()" style="margin-bottom:12px; border-color:var(--blue); color:var(--blue)">
-      🔓 AUTORIZAR SENSORES (iOS)
+      🔓 AUTORIZAR SENSORES FÍSICOS
     </button>
     
     <div class="g2" style="margin-bottom:12px">
       <div class="sensor-box">
         <div class="row" style="justify-content:space-between; margin-bottom:4px">
-          <div class="sensor-lbl">Theremin Físico</div>
-          <button class="chip chip-xs" id="thr-toggle" onclick="toggleTheremin()" style="width:40px; padding:4px">OFF</button>
+          <div class="sensor-lbl">Harmonic Shift (Filtro)</div>
+          <button class="chip chip-xs" id="kin-y-toggle" onclick="toggleKineticY()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div style="display:flex; justify-content:space-between">
-          <div><div class="sensor-lbl" style="color:var(--blue)">Eixo Y (Pitch)</div><div class="sensor-val" id="sens-y">0°</div></div>
-          <div style="text-align:right"><div class="sensor-lbl" style="color:var(--cyan)">Eixo X (Vol)</div><div class="sensor-val" style="color:var(--cyan)" id="sens-x">0°</div></div>
-        </div>
+        <div><div class="sensor-lbl" style="color:var(--blue)">Eixo Y (Pitch/Filtro)</div><div class="sensor-val" id="sens-y">0°</div></div>
       </div>
 
       <div class="sensor-box">
         <div class="row" style="justify-content:space-between; margin-bottom:4px">
-          <div class="sensor-lbl">Spatial Chorus</div>
-          <button class="chip chip-xs" id="cho-toggle" onclick="toggleChorus()" style="width:40px; padding:4px">OFF</button>
+          <div class="sensor-lbl">Auto Slicer Rate</div>
+          <button class="chip chip-xs" id="kin-x-toggle" onclick="toggleKineticX()" style="width:40px; padding:4px">OFF</button>
         </div>
-        <div><div class="sensor-lbl" style="color:var(--violet)">Eixo Z (Bússola/Rate)</div><div class="sensor-val" style="color:var(--violet)" id="sens-z">0°</div></div>
+        <div><div class="sensor-lbl" style="color:var(--cyan)">Eixo X (Divisão do Slicer)</div><div class="sensor-val" style="color:var(--cyan)" id="sens-x">0°</div></div>
       </div>
-    </div>
-
-    <div style="margin-top:10px">
-      <div class="clabel2" style="display:flex;justify-content:space-between"><span>Volume Máx do Theremin</span><span id="thr-vol-val" style="color:var(--muted)">15%</span></div>
-      <input type="range" class="ri" id="thr-vol" min="0" max="100" step="1" value="15" oninput="updateThereminVol()" style="margin:0">
     </div>
   </div>
 
@@ -236,23 +246,36 @@ hr.d{border:none;border-top:1px dashed var(--border);margin:16px 0}
 let AC = null, masterAn = null;
 let micStream = null, micSource = null, micAn = null, micActive = false;
 
-let micFilter = null, micGainNode = null, micMonitorGain = null, dspOutputGain = null;
+// Audio Nodes
+let micFilter = null, micGainNode = null, micMonitorGain = null;
+let slicerGain = null;
 let doomDryGain = null, doomWetGain = null, micDistortion = null, micLimiter = null;
 let delayNode = null, delayFeedback = null, delayGate = null, delayDryGain = null, delayWetGain = null, delayInputGain = null;
+let micHardClipper = null;
 
-// KINETIC NODES
-let thereminOsc = null, thereminGain = null, isThereminOn = false, thereminMaxVol = 0.15;
-let chorusDelay = null, chorusLFO = null, chorusDepth = null, isChorusOn = false;
+// States
+let isMicFilterOn = false, isMicMonitorOn = false, isDoomModeOn = false, isDelayOn = false, isSlicerOn = false;
+
+// Slicer Engine
+let slicerBPM = 120;
+let slicerDiv = 1; // 1/4 note default
+let slicerDsrPct = 0.5;
+let nextSlicerTime = 0;
+let slicerTimerId = null;
+
+// Kinetic Sensors
+let isKineticYOn = false;
+let isKineticXOn = false;
 let sensorsAuthorized = false;
 
-let micHardClipper = null;
-let isMicFilterOn = false, isMicMonitorOn = false, isDoomModeOn = false, isDelayOn = false;
-
-// KNOB STATE
+// Knob State
 let knobRateVal = 300; 
-let isKnobDragging = false;
-let knobStartY = 0;
-let knobStartVal = 300;
+let isKnobDragging = false, knobStartY = 0, knobStartVal = 300;
+
+// Anti-Stagnation Engine
+let stagnateFreq = 0;
+let stagnateFrames = 0;
+let lastPeakHold = { val: -80, freq: 0, time: 0 };
 
 function fLog(v, lo, hi) { return Math.pow(10, (v / 100) * (Math.log10(hi) - Math.log10(lo)) + Math.log10(lo)); }
 function mapRange(val, inMin, inMax, outMin, outMax) { return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin; }
@@ -284,6 +307,7 @@ document.body.addEventListener('touchstart', () => { if (AC && AC.state === 'sus
 
 async function globalAudioReset() {
   if (micActive) stopMic(); 
+  clearTimeout(slicerTimerId);
   if (AC) { try { await AC.close(); } catch (e) { } AC = null; }
   masterAn = null; 
   getAC(); FB('DSP REINICIADO - Sistema limpo');
@@ -294,7 +318,6 @@ function makeDistortionCurve(amount) {
   for (let i = 0; i < n; ++i) { let x = i * 2 / n - 1; curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x)); }
   return curve;
 }
-
 function makeGateCurve(thresholdDB) {
   const curve = new Float32Array(8192), thrLin = Math.pow(10, thresholdDB / 20);
   for (let i = 0; i < 8192; i++) {
@@ -319,86 +342,104 @@ knobEl.addEventListener('pointermove', (e) => { if (!isKnobDragging) return; e.p
 ['pointerup', 'pointercancel'].forEach(ev => { knobEl.addEventListener(ev, (e) => { isKnobDragging = false; knobEl.releasePointerCapture(e.pointerId); }); });
 updateKnobVis();
 
-
 // ═══════════════════════ KINETIC SENSORS ═══════════════════════
 function requestDeviceMotion() {
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     DeviceOrientationEvent.requestPermission().then(permissionState => {
       if (permissionState === 'granted') {
         window.addEventListener('deviceorientation', handleOrientation);
-        sensorsAuthorized = true;
-        document.getElementById('sensor-auth-btn').style.display = 'none';
-        FB('Sensores Autorizados', 'var(--green)');
+        sensorsAuthorized = true; document.getElementById('sensor-auth-btn').style.display = 'none'; FB('Sensores Autorizados', 'var(--green)');
       } else { FB('Permissão Negada', 'var(--red)'); }
     }).catch(console.error);
   } else {
     window.addEventListener('deviceorientation', handleOrientation);
-    sensorsAuthorized = true;
-    document.getElementById('sensor-auth-btn').style.display = 'none';
-    FB('Sensores Ativos', 'var(--green)');
+    sensorsAuthorized = true; document.getElementById('sensor-auth-btn').style.display = 'none'; FB('Sensores Ativos', 'var(--green)');
   }
 }
 
-function updateThereminVol() {
-  thereminMaxVol = +document.getElementById('thr-vol').value / 100;
-  document.getElementById('thr-vol-val').textContent = document.getElementById('thr-vol').value + '%';
+function toggleKineticY() {
+  if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
+  isKineticYOn = !isKineticYOn;
+  const btn = document.getElementById('kin-y-toggle'); btn.textContent = isKineticYOn ? 'ON' : 'OFF'; btn.className = isKineticYOn ? 'chip chip-xs on' : 'chip chip-xs';
+  if(!isMicFilterOn && isKineticYOn) toggleMicFilter();
+}
+function toggleKineticX() {
+  if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
+  isKineticXOn = !isKineticXOn;
+  const btn = document.getElementById('kin-x-toggle'); btn.textContent = isKineticXOn ? 'ON' : 'OFF'; btn.className = isKineticXOn ? 'chip chip-xs on' : 'chip chip-xs';
+  if(!isSlicerOn && isKineticXOn) toggleSlicer();
 }
 
 function handleOrientation(e) {
   if(e.beta !== null) document.getElementById('sens-y').textContent = Math.round(e.beta) + '°';
   if(e.gamma !== null) document.getElementById('sens-x').textContent = Math.round(e.gamma) + '°';
-  if(e.alpha !== null) document.getElementById('sens-z').textContent = Math.round(e.alpha) + '°';
 
-  if (isThereminOn && thereminOsc && AC) {
-    let pitch = mapRange(Math.max(-90, Math.min(90, e.beta || 0)), -90, 90, 60, 2000);
-    let vol = mapRange(Math.max(-90, Math.min(90, e.gamma || 0)), -90, 90, 0, thereminMaxVol); 
-    thereminOsc.frequency.setTargetAtTime(pitch, AC.currentTime, 0.1);
-    thereminGain.gain.setTargetAtTime(vol, AC.currentTime, 0.1);
+  // Y-axis = Torce a frequência do Isolador Bandpass
+  if (isKineticYOn && micFilter && AC) {
+    let f = mapRange(Math.max(-90, Math.min(90, e.beta || 0)), -90, 90, 200, 8000);
+    micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.1);
+    // UI Update
+    const pct = (Math.log10(f) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20)) * 100;
+    document.getElementById('mic-bp-f').value = pct;
+    document.getElementById('bp-f-val').textContent = Math.round(f) + 'Hz';
   }
 
-  if (isChorusOn && chorusLFO && AC) {
-    let lfoRate = mapRange(e.alpha || 0, 0, 360, 0.1, 8.0);
-    chorusLFO.frequency.setTargetAtTime(lfoRate, AC.currentTime, 0.1);
+  // X-axis = Torce a subdivisão do Slicer
+  if (isKineticXOn && isSlicerOn) {
+    let tilt = Math.max(-90, Math.min(90, e.gamma || 0));
+    let newDiv = 1;
+    let divId = 'sl-1-4';
+    if(tilt < -30) { newDiv = 0.5; divId = 'sl-1-8'; }
+    else if(tilt < -60) { newDiv = 0.25; divId = 'sl-1-16'; }
+    else if(tilt > 30) { newDiv = 2; divId = 'sl-1-2'; }
+    
+    if(slicerDiv !== newDiv) setSlicerDiv(newDiv, divId);
   }
 }
 
-function toggleTheremin() {
-  if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
-  if(!micActive) { FB('Ative o Microfone para injetar o sinal', 'var(--red)'); return; }
+// ═══════════════════════ SLICER ENGINE ═══════════════════════
+function scheduleSlicer() {
+  if (!isSlicerOn || !slicerGain || !AC) return;
+  const now = AC.currentTime;
+  const beatLen = 60 / slicerBPM;
+  const stepLen = beatLen * slicerDiv; // 1/4 = 1, 1/8 = 0.5
   
-  isThereminOn = !isThereminOn;
-  const btn = document.getElementById('thr-toggle'); btn.textContent = isThereminOn ? 'ON' : 'OFF'; btn.className = isThereminOn ? 'chip chip-xs on' : 'chip chip-xs';
+  if (now >= nextSlicerTime - 0.1) { // Lookahead
+    slicerGain.gain.setValueAtTime(1, nextSlicerTime);
+    slicerGain.gain.setTargetAtTime(0.01, nextSlicerTime + (stepLen * slicerDsrPct), 0.02); // DSR envelope
+    nextSlicerTime += stepLen;
+  }
+  slicerTimerId = setTimeout(scheduleSlicer, 25);
+}
+
+function toggleSlicer() {
+  isSlicerOn = !isSlicerOn;
+  const btn = document.getElementById('slicer-toggle'); btn.textContent = isSlicerOn ? 'ON' : 'OFF'; btn.className = isSlicerOn ? 'chip chip-xs on' : 'chip chip-xs';
+  ['slicer-bpm','slicer-dsr'].forEach(id => document.getElementById(id).disabled = !isSlicerOn);
   
-  const c = AC;
-  if(isThereminOn) {
-    thereminOsc = c.createOscillator(); thereminOsc.type = 'sine';
-    thereminGain = c.createGain(); thereminGain.gain.value = 0;
-    thereminOsc.connect(thereminGain);
-    
-    // Injeta o Theremin no Roteamento ANTES do Doom Mode
-    if(micGainNode) thereminGain.connect(micGainNode);
-    
-    thereminOsc.start();
-    FB('Theremin Ativo (Injetado no Mic Bus)', 'var(--blue)');
+  if (isSlicerOn && AC) {
+    if(slicerGain) slicerGain.gain.value = 1; // Reseta antes de iniciar
+    nextSlicerTime = AC.currentTime + 0.1;
+    scheduleSlicer();
+    FB('Slicer Engine Ativa', 'var(--green)');
   } else {
-    if(thereminOsc) { thereminOsc.stop(); thereminOsc.disconnect(); thereminGain.disconnect(); }
+    clearTimeout(slicerTimerId);
+    if(slicerGain && AC) slicerGain.gain.setTargetAtTime(1, AC.currentTime, 0.05); // Pass-through total
   }
 }
-
-function toggleChorus() {
-  if(!sensorsAuthorized) { FB('Autorize os sensores primeiro', 'var(--red)'); return; }
-  if(!micActive) { FB('Ative a Engine de Áudio (Mic)', 'var(--red)'); return; }
-
-  isChorusOn = !isChorusOn;
-  const btn = document.getElementById('cho-toggle'); btn.textContent = isChorusOn ? 'ON' : 'OFF'; btn.className = isChorusOn ? 'chip chip-xs on' : 'chip chip-xs';
-  
-  if(isChorusOn && chorusDepth) {
-    chorusDepth.gain.setTargetAtTime(0.003, AC.currentTime, 0.1);
-    FB('Spatial Chorus Ativado', 'var(--violet)');
-  } else if(chorusDepth) {
-    chorusDepth.gain.setTargetAtTime(0, AC.currentTime, 0.1);
-  }
+function updateSlicer() {
+  slicerBPM = +document.getElementById('slicer-bpm').value;
+  slicerDsrPct = +document.getElementById('slicer-dsr').value / 100;
+  document.getElementById('slicer-bpm-v').textContent = slicerBPM;
+  document.getElementById('slicer-dsr-v').textContent = Math.round(slicerDsrPct*100) + '%';
 }
+function setSlicerDiv(val, id) {
+  slicerDiv = val;
+  document.querySelectorAll('[id^=sl-1-]').forEach(b => b.classList.remove('on'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('on');
+}
+
 
 // ═══════════════════════ ENGINE DE ÁUDIO & ROTEAMENTO MASTER ═══════════════════════
 async function startMic() {
@@ -411,11 +452,14 @@ async function startMic() {
     // Filter
     micFilter = c.createBiquadFilter(); micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass'; micFilter.frequency.value = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
     
-    // Summing Bus (Mic + Theremin)
-    micGainNode = c.createGain(); 
-    micAn = c.createAnalyser(); micAn.fftSize = 4096;
+    // Slicer
+    slicerGain = c.createGain(); slicerGain.gain.value = 1;
 
-    // Doom Mode (Parallel Route)
+    micGainNode = c.createGain(); 
+    // Analyser: smoothingTimeConstant subido para 0.92 (Suavidade e Peak Hold visual)
+    micAn = c.createAnalyser(); micAn.fftSize = 4096; micAn.smoothingTimeConstant = 0.92; 
+
+    // Doom Mode Split
     const initDoomMix = +document.getElementById('doom-mix').value / 100;
     doomDryGain = c.createGain(); doomDryGain.gain.value = isDoomModeOn ? 1 - initDoomMix : 1; 
     doomWetGain = c.createGain(); doomWetGain.gain.value = isDoomModeOn ? initDoomMix : 0;
@@ -428,58 +472,38 @@ async function startMic() {
     delayGate = c.createWaveShaper(); delayGate.curve = isDelayOn ? makeGateCurve(+document.getElementById('dly-thr').value) : makeGateCurve(-60);
     delayNode = c.createDelay(3.0); delayNode.delayTime.value = knobRateVal / 1000;
     delayFeedback = c.createGain(); delayFeedback.gain.value = (+document.getElementById('dly-fb').value) / 100;
-    
     delayDryGain = c.createGain(); delayWetGain = c.createGain();
     const delayMix = +document.getElementById('dly-mix').value / 100;
     delayDryGain.gain.value = isDelayOn ? 1 - delayMix : 1; 
     delayWetGain.gain.value = isDelayOn ? delayMix : 0;
 
-    // Chorus Bus
-    chorusDelay = c.createDelay(1.0); chorusDelay.delayTime.value = 0.02; // 20ms base
-    chorusLFO = c.createOscillator(); chorusLFO.frequency.value = 1; // Eixo Z modula isso
-    chorusDepth = c.createGain(); chorusDepth.gain.value = isChorusOn ? 0.003 : 0;
-    chorusLFO.connect(chorusDepth); chorusDepth.connect(chorusDelay.delayTime);
-    chorusLFO.start();
-
-    // Outputs
-    dspOutputGain = c.createGain();
+    // Output
     micMonitorGain = c.createGain(); micMonitorGain.gain.value = isMicMonitorOn ? 1 : 0;
     micHardClipper = c.createWaveShaper(); micHardClipper.curve = new Float32Array([-1, 1]);
 
-    // ROTEAMENTO FÍSICO
-    micSource.connect(micFilter); micFilter.connect(micGainNode); 
-    micGainNode.connect(micAn); // Visor RTA Pós-Filtro (Pré-Doom)
+    // ROTEAMENTO: Mic -> Filtro -> Slicer -> (Analyser) -> Doom Mode -> Delay -> Fones
+    micSource.connect(micFilter); 
+    micFilter.connect(slicerGain);
+    slicerGain.connect(micGainNode);
+    micGainNode.connect(micAn); // Visor RTA Pós-Slicer
     
-    // Doom Mode Split
-    micGainNode.connect(doomDryGain); 
-    doomDryGain.connect(delayInputGain); // Dry directly to delay
-
-    micGainNode.connect(micDistortion); 
-    micDistortion.connect(micLimiter); 
-    micLimiter.connect(doomWetGain); 
-    doomWetGain.connect(delayInputGain); // Wet (Crushed) to delay
+    // Doom Split
+    micGainNode.connect(doomDryGain); doomDryGain.connect(delayInputGain); 
+    micGainNode.connect(micDistortion); micDistortion.connect(micLimiter); micLimiter.connect(doomWetGain); doomWetGain.connect(delayInputGain); 
     
     // Delay Split
     delayInputGain.connect(delayDryGain); 
-    delayInputGain.connect(delayGate); delayGate.connect(delayNode); delayNode.connect(delayFeedback); delayFeedback.connect(delayNode); 
-    delayNode.connect(delayWetGain); 
+    delayInputGain.connect(delayGate); delayGate.connect(delayNode); delayNode.connect(delayFeedback); delayFeedback.connect(delayNode); delayNode.connect(delayWetGain); 
 
-    // Mix Delay -> Chorus Bus
-    delayDryGain.connect(chorusDelay); delayWetGain.connect(chorusDelay);
-    
-    // Chorus -> Master DSP Output
-    chorusDelay.connect(dspOutputGain);
-
-    // Master DSP -> Monitor -> Physical Speaker
-    dspOutputGain.connect(micMonitorGain);
-    micMonitorGain.connect(micHardClipper); 
-    micHardClipper.connect(c.destination);
-
-    // Reconecta o theremin se já estiver ativo
-    if(isThereminOn && thereminGain) thereminGain.connect(micGainNode);
+    // Mix Output
+    delayDryGain.connect(micMonitorGain); delayWetGain.connect(micMonitorGain);
+    micMonitorGain.connect(micHardClipper); micHardClipper.connect(c.destination);
 
     micActive = true;
     const btn = document.getElementById('mic-btn'); btn.innerHTML = '🔴 PARAR ENGINE'; btn.className = 'btn btn-r';
+    
+    // Reseta estado da Anti-Estagnação
+    stagnateFreq = 0; stagnateFrames = 0;
     drawMicSpec();
   } catch (e) { FB('Falha no acesso ao microfone.', 'var(--red)'); }
 }
@@ -487,22 +511,58 @@ async function startMic() {
 function stopMic() {
   if (micStream) micStream.getTracks().forEach(t => t.stop());
   micStream = null; micSource = null; micAn = null; micActive = false;
+  clearTimeout(slicerTimerId);
   const btn = document.getElementById('mic-btn'); btn.innerHTML = '🎙 LIGAR ENGINE (MIC)'; btn.className = 'btn btn-c';
   document.getElementById('mic-freq').textContent = '—'; document.getElementById('mic-db').textContent = '— dBFS'; document.getElementById('mic-vu').style.width = '0%';
 }
 function toggleMic() { if (micActive) stopMic(); else startMic(); }
 
-// ═══════════════════════ UI & DSP CONTROLS ═══════════════════════
+// ═══════════════════════ CHAOS/BREATH ENGINE (Anti-Stagnation) ═══════════════════════
+function stagnationEngine(currentFreq) {
+  // Se a frequência mudar drasticamente, reseta o timer
+  if (Math.abs(currentFreq - stagnateFreq) > 8) {
+    stagnateFreq = currentFreq;
+    stagnateFrames = 0;
+  } else {
+    stagnateFrames++;
+    // 6 segundos (approx 360 frames at 60fps)
+    if (stagnateFrames > 360) {
+      triggerChaosShift();
+      stagnateFrames = 0; // Reseta para não trigar em loop infinito
+    }
+  }
+}
+
+function triggerChaosShift() {
+  if (!AC) return;
+  // Rasga o filtro e o delay abruptamente para quebrar a microfonia estacionária
+  if (micFilter && isMicFilterOn) {
+    const currentF = micFilter.frequency.value;
+    micFilter.frequency.setTargetAtTime(currentF * 0.5, AC.currentTime, 0.1);
+    micFilter.frequency.setTargetAtTime(currentF, AC.currentTime + 0.5, 0.4);
+  }
+  if (delayNode && isDelayOn) {
+    const currentRate = delayNode.delayTime.value;
+    delayNode.delayTime.linearRampToValueAtTime(currentRate + 0.05, AC.currentTime + 0.1);
+    delayNode.delayTime.linearRampToValueAtTime(currentRate, AC.currentTime + 0.8);
+  }
+  document.getElementById('mic-freq').style.color = 'var(--violet)';
+  setTimeout(()=> document.getElementById('mic-freq').style.color = 'var(--cyan)', 800);
+  FB('KINETIC SHIFT (Anti-Estagnação acionado)', 'var(--violet)');
+}
+
+
+// UI CONTROLS REMAINDER
 function toggleMicFilter() {
   isMicFilterOn = !isMicFilterOn;
   const btn = document.getElementById('bp-toggle'); btn.textContent = isMicFilterOn ? 'ON' : 'OFF'; btn.className = isMicFilterOn ? 'chip chip-xs on' : 'chip chip-xs';
-  document.getElementById('mic-bp-f').disabled = !isMicFilterOn; 
+  document.getElementById('mic-bp-f').disabled = !isMicFilterOn; document.getElementById('mic-bp-q').disabled = !isMicFilterOn;
   if (micFilter) micFilter.type = isMicFilterOn ? 'bandpass' : 'allpass';
 }
 function updateMicFilter() {
-  const f = fLog(+document.getElementById('mic-bp-f').value, 20, 20000);
-  document.getElementById('bp-f-val').textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'kHz' : Math.round(f) + 'Hz'; 
-  if (micFilter && AC) { micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); }
+  const f = fLog(+document.getElementById('mic-bp-f').value, 20, 20000), q = +document.getElementById('mic-bp-q').value;
+  document.getElementById('bp-f-val').textContent = f >= 1000 ? (f / 1000).toFixed(1) + 'kHz' : Math.round(f) + 'Hz'; document.getElementById('bp-q-val').textContent = 'Q: ' + q;
+  if (micFilter && AC) { micFilter.frequency.setTargetAtTime(f, AC.currentTime, 0.05); micFilter.Q.setTargetAtTime(q, AC.currentTime, 0.05); }
 }
 
 function toggleDoomMode() {
@@ -516,12 +576,8 @@ function toggleDoomMode() {
 function updateDoomMode() {
   const drive = +document.getElementById('mic-drive').value;
   const mix = +document.getElementById('doom-mix').value;
-  
-  document.getElementById('drive-val').textContent = drive + '%';
-  document.getElementById('doom-mix-val').textContent = mix + '%';
-  
+  document.getElementById('drive-val').textContent = drive + '%'; document.getElementById('doom-mix-val').textContent = mix + '%';
   if (micDistortion) micDistortion.curve = makeDistortionCurve(drive);
-  
   if(AC && doomDryGain && doomActiveGain) {
     doomDryGain.gain.setTargetAtTime(isDoomModeOn ? 1 - (mix/100) : 1, AC.currentTime, 0.05);
     doomActiveGain.gain.setTargetAtTime(isDoomModeOn ? mix/100 : 0, AC.currentTime, 0.05);
@@ -531,18 +587,17 @@ function updateDoomMode() {
 function toggleDelay() {
   isDelayOn = !isDelayOn;
   const btn = document.getElementById('dly-toggle'); btn.textContent = isDelayOn ? 'ON' : 'OFF'; btn.className = isDelayOn ? 'chip chip-xs on' : 'chip chip-xs';
-  ['dly-fb','dly-mix','dly-thr'].forEach(id => document.getElementById(id).disabled = !isDelayOn);
+  ['dly-fb','dly-mix'].forEach(id => document.getElementById(id).disabled = !isDelayOn);
   if(isDelayOn) document.getElementById('dly-rate-knob').classList.remove('disabled'); else document.getElementById('dly-rate-knob').classList.add('disabled');
   updateDelay();
 }
 function updateDelay() {
-  const fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value, thr = +document.getElementById('dly-thr').value;
-  document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; document.getElementById('dly-thr-v').textContent = thr + 'dB';
+  const fb = +document.getElementById('dly-fb').value, mix = +document.getElementById('dly-mix').value;
+  document.getElementById('dly-fb-v').textContent = fb + '%'; document.getElementById('dly-mix-v').textContent = mix + '%'; 
   if (AC && delayNode) {
     delayFeedback.gain.setTargetAtTime(fb / 100, AC.currentTime, 0.05);
     delayDryGain.gain.setTargetAtTime(isDelayOn ? 1 - (mix/100) : 1, AC.currentTime, 0.05);
     delayWetGain.gain.setTargetAtTime(isDelayOn ? mix/100 : 0, AC.currentTime, 0.05);
-    if(delayGate) delayGate.curve = isDelayOn ? makeGateCurve(thr) : makeGateCurve(-60);
   }
 }
 
@@ -552,28 +607,55 @@ function toggleMicMonitor() {
   if (micMonitorGain && AC) micMonitorGain.gain.setTargetAtTime(isMicMonitorOn ? 1 : 0, AC.currentTime, 0.05);
 }
 
-// ═══════════════════════ RTA VISUALIZER ═══════════════════════
+// ═══════════════════════ RTA VISUALIZER WITH PEAK HOLD ═══════════════════════
 const cvs = document.getElementById('mic-spec'), ctx = cvs.getContext('2d');
 function resCvs() { if (cvs.offsetWidth > 0) { cvs.width = cvs.offsetWidth * devicePixelRatio; cvs.height = cvs.offsetHeight * devicePixelRatio; } }
 window.addEventListener('resize', resCvs); setTimeout(resCvs, 100);
 function getZoneColor(f) { if (f < 250) return [79, 195, 247]; if (f < 500) return [0, 229, 255]; if (f < 2000) return [0, 255, 136]; if (f < 5000) return [245, 166, 35]; return [179, 136, 255]; }
+
 function drawMicSpec() {
   if (!micActive) return; requestAnimationFrame(drawMicSpec); if (!micAn || !AC) return;
   const data = new Uint8Array(micAn.frequencyBinCount); micAn.getByteFrequencyData(data);
-  const rms = data.reduce((s, v) => s + (v / 255) ** 2, 0) / data.length, db = Math.max(-80, 20 * Math.log10(Math.sqrt(rms) + 1e-9));
-  document.getElementById('mic-db').textContent = db.toFixed(1) + ' dBFS'; document.getElementById('mic-vu').style.width = Math.max(0, Math.min(100, (db + 80) / 80 * 100)) + '%';
+  const rms = data.reduce((s, v) => s + (v / 255) ** 2, 0) / data.length;
+  const db = Math.max(-80, 20 * Math.log10(Math.sqrt(rms) + 1e-9));
+  
+  const now = performance.now();
+
+  // Peak Hold UI Text Logic
+  if (db > lastPeakHold.val) {
+    lastPeakHold.val = db;
+    lastPeakHold.time = now;
+  } else if (now - lastPeakHold.time > 1500) {
+    lastPeakHold.val -= 0.5; // Decai lentamente após 1.5s
+  }
+
+  document.getElementById('mic-db').textContent = lastPeakHold.val.toFixed(1) + ' dBFS';
+  document.getElementById('mic-vu').style.width = Math.max(0, Math.min(100, (lastPeakHold.val + 80) / 80 * 100)) + '%';
+
   let pIdx = 0, pVal = 0; for (let i = 2; i < data.length; i++) { if (data[i] > pVal && data[i] > 80) { pVal = data[i]; pIdx = i; } }
   const pFreq = Math.round(pIdx * AC.sampleRate / micAn.fftSize);
+  
   if (pVal > 80) {
+    lastPeakHold.freq = pFreq;
     document.getElementById('mic-freq').textContent = pFreq >= 1000 ? (pFreq / 1000).toFixed(2) + 'k' : pFreq;
     document.getElementById('mic-note').textContent = noteStr(pFreq);
     document.getElementById('peak-alert').classList.toggle('show', pVal > 240 && rms > 0.1);
-  } else { document.getElementById('mic-freq').textContent = '—'; document.getElementById('mic-note').textContent = 'Silêncio'; document.getElementById('peak-alert').classList.remove('show'); }
+    
+    // Alimenta o motor de estagnação com a onda fundamental
+    stagnationEngine(pFreq);
+  } else { 
+    document.getElementById('peak-alert').classList.remove('show'); 
+  }
+
   const W = cvs.offsetWidth, H = cvs.offsetHeight, sc = devicePixelRatio; if (W === 0) return;
   cvs.width = W * sc; cvs.height = H * sc; ctx.clearRect(0, 0, cvs.width, cvs.height);
+  
   for (let px = 0; px < W; px++) {
-    const f = Math.pow(10, Math.log10(20) + (px / W) * (Math.log10(20000) - Math.log10(20))), val = data[Math.round(f / AC.sampleRate * micAn.fftSize)] || 0, c = getZoneColor(f);
-    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${0.2 + val / 255 * 0.8})`; ctx.fillRect(px * sc, (H - (val / 255) * H) * sc, sc, (val / 255) * H * sc);
+    const f = Math.pow(10, Math.log10(20) + (px / W) * (Math.log10(20000) - Math.log10(20)));
+    const val = data[Math.round(f / AC.sampleRate * micAn.fftSize)] || 0;
+    const c = getZoneColor(f);
+    ctx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${0.2 + val / 255 * 0.8})`; 
+    ctx.fillRect(px * sc, (H - (val / 255) * H) * sc, sc, (val / 255) * H * sc);
   }
 }
 
